@@ -42,7 +42,8 @@ interface CategoryItem {
 
 export function Header({ categories = [] }: { categories?: CategoryItem[] }) {
   const router = useRouter();
-  const { data: session } = useSession();
+  const sessionState = useSession();
+  const session = sessionState?.data;
   const cartItemCount = useCartStore((state) => state.getItemCount());
   const wishlistCount = useWishlistStore((state) => state.items.length);
   const openCartDrawer = useUIStore((state) => state.openCartDrawer);

@@ -66,7 +66,7 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.title,
-    image: product.images.map((img) => img.url),
+    image: product.images.map((img: any) => img.url),
     description: product.description,
     sku: product.sku,
     brand: {
@@ -121,7 +121,7 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
               You May Also Like
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-              {relatedProducts.map((rel) => (
+              {relatedProducts.map((rel: any) => (
                 <ProductCard
                   key={rel.id}
                   id={rel.id}

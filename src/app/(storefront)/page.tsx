@@ -177,7 +177,7 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {categories.map((cat) => (
+            {categories.map((cat: any) => (
               <Link
                 key={cat.id}
                 href={`/products?category=${cat.slug}`}
@@ -225,7 +225,7 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {flashDeals.map((product) => (
+              {flashDeals.map((product: any) => (
                 <ProductCard
                   key={product.id}
                   id={product.id}
@@ -263,7 +263,7 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
+            {featuredProducts.map((product: any) => (
               <ProductCard
                 key={product.id}
                 id={product.id}
@@ -299,7 +299,7 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {vendors.map((v) => (
+              {vendors.map((v: any) => (
                 <div key={v.id} className="bg-white dark:bg-slate-950 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                   <div className="flex items-center gap-4">
                     <img
