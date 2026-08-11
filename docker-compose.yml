@@ -26,7 +26,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgrespassword@postgres:5432/dashato_db?schema=public
+      - DATABASE_URL=postgresql://postgres:dashato%401234.@db.rcyowkplkiotpahrhxfl.supabase.co:5432/postgres
+      # - DATABASE_URL=postgresql://postgres:postgrespassword@postgres:5432/dashato_db?schema=public
       - NEXTAUTH_URL=http://localhost:3000
       - NEXTAUTH_SECRET=dashato-docker-secret-2026
       - NODE_ENV=production
