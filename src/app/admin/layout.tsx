@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { LanguageToggle } from '@/components/language-toggle';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
@@ -106,13 +108,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             />
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <LanguageToggle />
+            <ThemeToggle />
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="w-5 h-5 text-slate-600 dark:text-slate-300" />
               <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500" />
             </Button>
 
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex items-center gap-2 text-xs border-l border-slate-200 dark:border-slate-800 pl-3">
               <span className="font-bold text-slate-800 dark:text-slate-200">{user.name}</span>
             </div>
           </div>

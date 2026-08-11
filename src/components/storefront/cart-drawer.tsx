@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ShieldCheck, Truck } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
 import { useUIStore } from '@/store/ui-store';
+import { useTranslation } from '@/lib/i18n/context';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
 
 export function CartDrawer() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { isCartDrawerOpen, closeCartDrawer } = useUIStore();
   const { items, updateQuantity, removeItem, getSubtotal, getShippingFee, getGrandTotal } = useCartStore();
 

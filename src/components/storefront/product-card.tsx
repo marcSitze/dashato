@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
 import { useCompareStore } from '@/store/compare-store';
+import { useTranslation } from '@/lib/i18n/context';
 import { formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -44,6 +45,7 @@ export function ProductCard({
   inventory,
   sku,
 }: ProductCardProps) {
+  const { t } = useTranslation();
   const addItem = useCartStore((state) => state.addItem);
   const { toggleWishlist, isInWishlist } = useWishlistStore();
   const { toggleCompare, isInCompare } = useCompareStore();
@@ -134,12 +136,12 @@ export function ProductCard({
           )}
           {isBestSeller && (
             <Badge variant="default" className="bg-amber-500 text-slate-950 font-bold text-[10px]">
-              Best Seller
+              {t.bestSellers}
             </Badge>
           )}
           {isNewArrival && (
             <Badge variant="secondary" className="bg-blue-600 text-white font-bold text-[10px]">
-              New Arrival
+              {t.newArrivals}
             </Badge>
           )}
         </div>
@@ -227,7 +229,7 @@ export function ProductCard({
               variant="default"
               className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl flex items-center gap-1.5 px-3"
             >
-              <ShoppingBag className="w-3.5 h-3.5" /> Add
+              <ShoppingBag className="w-3.5 h-3.5" /> {t.addToCart}
             </Button>
           </div>
         </div>

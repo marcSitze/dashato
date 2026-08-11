@@ -10,6 +10,7 @@ import { Footer } from '@/components/storefront/footer';
 import { CartDrawer } from '@/components/storefront/cart-drawer';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
+import { useTranslation } from '@/lib/i18n/context';
 import {
   ShoppingBag,
   Trash2,
@@ -29,6 +30,7 @@ import { toast } from 'sonner';
 
 export default function CartPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const {
     items,
     updateQuantity,
@@ -96,7 +98,7 @@ export default function CartPage() {
 
       <main className="flex-1 max-w-7xl mx-auto px-4 py-12 w-full">
         <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight mb-8">
-          Shopping Cart & Order Summary
+          {t.shoppingCart} & {t.orderSummary}
         </h1>
 
         {items.length === 0 ? (
@@ -104,13 +106,13 @@ export default function CartPage() {
             <div className="w-20 h-20 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto mb-6">
               <ShoppingBag className="w-10 h-10" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">Your shopping cart is empty</h2>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">{t.emptyCart}</h2>
             <p className="text-sm text-slate-500 mb-8 max-w-md mx-auto">
-              Explore multi-vendor electronics, workstations, audio equipment, and Scandinavian furniture.
+              {t.emptyCartSubtitle}
             </p>
             <Link href="/products">
               <Button size="lg" className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-8 rounded-xl text-base">
-                Discover Marketplace Products
+                {t.startShopping}
               </Button>
             </Link>
           </div>
@@ -131,7 +133,7 @@ export default function CartPage() {
                       </span>
                     </div>
                     <span className="text-xs text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded">
-                      Verified Seller
+                      {t.seller}
                     </span>
                   </div>
 
@@ -149,7 +151,7 @@ export default function CartPage() {
                               {item.title}
                             </Link>
                             {item.variantTitle && (
-                              <p className="text-xs text-slate-500">Variant: {item.variantTitle}</p>
+                              <p className="text-xs text-slate-500">{t.variant}: {item.variantTitle}</p>
                             )}
                             <p className="text-xs text-slate-400 font-mono">SKU: {item.sku}</p>
 
@@ -208,7 +210,7 @@ export default function CartPage() {
                 </Button>
                 <Link href="/products">
                   <Button variant="outline" className="text-xs font-semibold rounded-xl">
-                    Continue Shopping
+                    {t.continueShopping}
                   </Button>
                 </Link>
               </div>
@@ -230,13 +232,13 @@ export default function CartPage() {
                   <form onSubmit={handleApplyCoupon} className="flex gap-2">
                     <Input
                       type="text"
-                      placeholder="Try code DASHATO10"
+                      placeholder={t.couponPlaceholder}
                       value={couponInput}
                       onChange={(e) => setCouponInput(e.target.value)}
                       className="text-xs rounded-xl uppercase"
                     />
                     <Button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold px-4">
-                      Apply
+                      {t.applyCoupon}
                     </Button>
                   </form>
                 )}
@@ -245,34 +247,34 @@ export default function CartPage() {
               {/* Order Summary */}
               <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                 <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base border-b border-slate-100 dark:border-slate-800 pb-3">
-                  Order Summary
+                  {t.orderSummary}
                 </h3>
 
                 <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
                   <div className="flex justify-between">
-                    <span>Items Subtotal</span>
+                    <span>{t.subtotal}</span>
                     <span className="font-bold text-slate-900 dark:text-slate-100">{formatCurrency(getSubtotal())}</span>
                   </div>
 
                   {discountPercentage > 0 && (
                     <div className="flex justify-between text-emerald-600 font-semibold">
-                      <span>Promo Discount ({discountPercentage}%)</span>
+                      <span>{t.discount} ({discountPercentage}%)</span>
                       <span>-{formatCurrency(getDiscountTotal())}</span>
                     </div>
                   )}
 
                   <div className="flex justify-between">
-                    <span>Estimated Shipping</span>
-                    <span>{getShippingFee() === 0 ? <strong className="text-emerald-600 font-bold uppercase">FREE</strong> : formatCurrency(getShippingFee())}</span>
+                    <span>{t.estimatedShipping}</span>
+                    <span>{getShippingFee() === 0 ? <strong className="text-emerald-600 font-bold uppercase">{t.freeShipping}</strong> : formatCurrency(getShippingFee())}</span>
                   </div>
 
                   <div className="flex justify-between">
-                    <span>Estimated Tax (8%)</span>
+                    <span>{t.estimatedTax}</span>
                     <span>{formatCurrency(getTax())}</span>
                   </div>
 
                   <div className="flex justify-between text-lg font-black text-slate-900 dark:text-slate-50 pt-4 border-t border-slate-100 dark:border-slate-800">
-                    <span>Order Total</span>
+                    <span>{t.grandTotal}</span>
                     <span className="text-amber-600 dark:text-amber-400">{formatCurrency(getGrandTotal())}</span>
                   </div>
                 </div>
@@ -282,12 +284,12 @@ export default function CartPage() {
                   size="lg"
                   className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-base shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
                 >
-                  Proceed to Checkout <ArrowRight className="w-5 h-5" />
+                  {t.proceedToCheckout} <ArrowRight className="w-5 h-5" />
                 </Button>
 
                 <div className="flex items-center justify-center gap-2 text-xs text-slate-500 text-center pt-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                  <span>Stripe Protected Multi-Vendor Payment</span>
+                  <span>{t.encryptedCheckout}</span>
                 </div>
               </div>
             </div>

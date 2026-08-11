@@ -23,10 +23,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
 import { useCompareStore } from '@/store/compare-store';
+import { useTranslation } from '@/lib/i18n/context';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
 
 export function ProductDetailsClient({ product }: { product: any }) {
+  const { t } = useTranslation();
   const images = product.images.length > 0
     ? product.images
     : [{ url: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=1000&q=80' }];
@@ -185,7 +187,7 @@ export function ProductDetailsClient({ product }: { product: any }) {
               )}
             </div>
             <Badge variant={currentStock > 0 ? 'success' : 'destructive'} className="font-bold">
-              {currentStock > 0 ? `In Stock (${currentStock} left)` : 'Out of Stock'}
+              {currentStock > 0 ? `${t.inStock} (${currentStock} left)` : t.outOfStock}
             </Badge>
           </div>
 
@@ -240,7 +242,7 @@ export function ProductDetailsClient({ product }: { product: any }) {
                 size="lg"
                 className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-base shadow-lg shadow-amber-500/20"
               >
-                <ShoppingBag className="w-5 h-5 mr-2" /> Add to Shopping Cart
+                <ShoppingBag className="w-5 h-5 mr-2" /> {t.addToCart}
               </Button>
             </div>
 
@@ -278,12 +280,12 @@ export function ProductDetailsClient({ product }: { product: any }) {
                     {vendorStoreName}
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
                   </h4>
-                  <span className="text-[10px] text-slate-400">Verified Marketplace Partner</span>
+                  <span className="text-[10px] text-slate-400">{t.seller}</span>
                 </div>
               </div>
               <Link href={`/products?vendor=${product.vendorId}`}>
                 <Button size="sm" variant="outline" className="text-xs rounded-lg h-8">
-                  Visit Store
+                  {t.visitStore}
                 </Button>
               </Link>
             </div>
@@ -293,15 +295,15 @@ export function ProductDetailsClient({ product }: { product: any }) {
           <div className="grid grid-cols-3 gap-2 text-[11px] text-slate-500 text-center pt-2">
             <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
               <Truck className="w-4 h-4 mx-auto text-amber-500" />
-              <span>Express Delivery</span>
+              <span>{t.trustShipping}</span>
             </div>
             <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
               <ShieldCheck className="w-4 h-4 mx-auto text-emerald-500" />
-              <span>1 Year Warranty</span>
+              <span>{t.trustGuarantee}</span>
             </div>
             <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
               <RotateCcw className="w-4 h-4 mx-auto text-blue-500" />
-              <span>30 Day Returns</span>
+              <span>{t.trustReturns}</span>
             </div>
           </div>
         </div>
@@ -312,13 +314,13 @@ export function ProductDetailsClient({ product }: { product: any }) {
         <Tabs defaultValue="description">
           <TabsList className="w-full justify-start border-b border-slate-200 dark:border-slate-800 rounded-none bg-transparent h-auto p-0 gap-6">
             <TabsTrigger value="description" className="rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent py-3 text-sm font-bold">
-              Product Overview
+              {t.description}
             </TabsTrigger>
             <TabsTrigger value="specs" className="rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent py-3 text-sm font-bold">
-              Specifications
+              {t.specifications}
             </TabsTrigger>
             <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent py-3 text-sm font-bold">
-              Customer Reviews ({product.reviews.length})
+              {t.reviews} ({product.reviews.length})
             </TabsTrigger>
           </TabsList>
 
