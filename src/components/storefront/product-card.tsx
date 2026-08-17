@@ -135,12 +135,12 @@ export function ProductCard({
             </Badge>
           )}
           {isBestSeller && (
-            <Badge variant="default" className="bg-amber-500 text-slate-950 font-bold text-[10px]">
+            <Badge variant="default" className="bg-primary text-primary-foreground font-bold text-[10px]">
               {t.bestSellers}
             </Badge>
           )}
           {isNewArrival && (
-            <Badge variant="secondary" className="bg-blue-600 text-white font-bold text-[10px]">
+            <Badge variant="secondary" className="bg-secondary text-secondary-foreground font-bold text-[10px]">
               {t.newArrivals}
             </Badge>
           )}
@@ -153,7 +153,7 @@ export function ProductCard({
             className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-colors ${
               isWishlisted
                 ? 'bg-rose-500 text-white'
-                : 'bg-white/90 dark:bg-slate-900/90 text-slate-700 dark:text-slate-200 hover:bg-rose-500 hover:text-white'
+                : 'bg-card/90 text-card-foreground hover:bg-rose-500 hover:text-white'
             }`}
             title="Add to Wishlist"
           >
@@ -164,8 +164,8 @@ export function ProductCard({
             onClick={handleCompareToggle}
             className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-colors ${
               isCompared
-                ? 'bg-amber-500 text-slate-950'
-                : 'bg-white/90 dark:bg-slate-900/90 text-slate-700 dark:text-slate-200 hover:bg-amber-500 hover:text-slate-950'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-card/90 text-card-foreground hover:bg-primary hover:text-primary-foreground'
             }`}
             title="Compare Product"
           >
@@ -179,15 +179,15 @@ export function ProductCard({
         <div>
           {/* Vendor Badge */}
           <div className="flex items-center justify-between text-[11px] mb-1">
-            <span className="text-slate-400 font-medium truncate">{brand?.name || 'Generic'}</span>
-            <span className="text-amber-600 dark:text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded truncate max-w-[120px]">
+            <span className="text-muted-foreground font-medium truncate">{brand?.name || 'Generic'}</span>
+            <span className="text-primary font-bold bg-primary/10 px-2 py-0.5 rounded truncate max-w-[120px]">
               {vendorName}
             </span>
           </div>
 
           {/* Product Title */}
           <Link href={`/products/${slug}`} className="block">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 line-clamp-2 hover:text-amber-500 transition-colors leading-snug">
+            <h3 className="text-sm font-bold text-card-foreground line-clamp-2 hover:text-primary transition-colors leading-snug">
               {title}
             </h3>
           </Link>
@@ -196,28 +196,28 @@ export function ProductCard({
         {/* Rating Stars & Review Count */}
         <div className="space-y-3 pt-1">
           <div className="flex items-center gap-1.5">
-            <div className="flex items-center text-amber-400">
+            <div className="flex items-center text-primary">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
                   className={`w-3.5 h-3.5 ${
-                    i < Math.floor(avgRating) ? 'fill-amber-400' : 'text-slate-300 dark:text-slate-700'
+                    i < Math.floor(avgRating) ? 'fill-primary text-primary' : 'text-muted-foreground/30'
                   }`}
                 />
               ))}
             </div>
-            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{avgRating.toFixed(1)}</span>
-            <span className="text-xs text-slate-400">({reviewCount})</span>
+            <span className="text-xs font-bold text-card-foreground">{avgRating.toFixed(1)}</span>
+            <span className="text-xs text-muted-foreground">({reviewCount})</span>
           </div>
 
           {/* Price & Add to Cart Button */}
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80">
+          <div className="flex items-center justify-between pt-2 border-t border-border">
             <div>
-              <div className="text-base font-extrabold text-slate-900 dark:text-slate-50">
+              <div className="text-base font-extrabold text-card-foreground">
                 {formatCurrency(price)}
               </div>
               {compareAtPrice && compareAtPrice > price && (
-                <div className="text-xs text-slate-400 line-through">
+                <div className="text-xs text-muted-foreground line-through">
                   {formatCurrency(compareAtPrice)}
                 </div>
               )}
@@ -227,7 +227,7 @@ export function ProductCard({
               onClick={handleAddToCart}
               size="sm"
               variant="default"
-              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl flex items-center gap-1.5 px-3"
+              className="bg-primary hover:bg-primary-hover text-primary-foreground font-bold rounded-xl flex items-center gap-1.5 px-3"
             >
               <ShoppingBag className="w-3.5 h-3.5" /> {t.addToCart}
             </Button>

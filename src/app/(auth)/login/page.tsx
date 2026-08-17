@@ -57,8 +57,17 @@ export default function LoginPage() {
       <main className="flex-1 max-w-md mx-auto px-4 py-16 w-full">
         <Card className="rounded-3xl p-8 border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
           <div className="text-center space-y-2">
-            <div className="bg-amber-500 text-slate-950 font-black text-2xl px-4 py-1.5 rounded-2xl w-fit mx-auto shadow-md">
-              Dashato
+            <div className="flex justify-center my-2">
+              <img
+                src="/Dashato_logo_light_mode.png"
+                alt="Dashato"
+                className="h-10 w-auto dark:hidden object-contain"
+              />
+              <img
+                src="/Dashato_logo_dark_mode.png"
+                alt="Dashato"
+                className="h-10 w-auto hidden dark:block object-contain"
+              />
             </div>
             <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
               Sign In to Your Account

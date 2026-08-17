@@ -3,75 +3,143 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #f4f5f8; /* Elegant Smoke White */
-  --foreground: #171717;
+  /* Core Palette Tokens */
+  --primary: #ff8811;
+  --primary-hover: #e57805;
+  --primary-foreground: #ffffff;
+
+  --secondary: #302d3f;
+  --secondary-hover: #23202e;
+  --secondary-foreground: #fff8f0;
+
+  --tertiary: #fff8f0;
+  --tertiary-hover: #faefe4;
+  --tertiary-foreground: #302d3f;
+
+  /* Theme Tokens for Light Mode */
+  --background: #faf8f5;
+  --foreground: #302d3f;
   --card: #ffffff;
-  --card-foreground: #171717;
+  --card-foreground: #302d3f;
   --popover: #ffffff;
-  --popover-foreground: #171717;
-  --primary: #fe9a00; /* Primary Brand Orange-Amber */
-  --primary-hover: #e58b00;
-  --primary-foreground: #171717;
-  --secondary: #eef0f4;
-  --secondary-foreground: #171717;
-  --muted: #e2e5eb;
-  --muted-foreground: #64748b;
-  --accent: #fff7ed;
-  --accent-foreground: #fe9a00;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #fe9a00;
+  --popover-foreground: #302d3f;
+  --muted: #f4eee8;
+  --muted-foreground: #6e6b7b;
+  --accent: #fff8f0;
+  --accent-foreground: #ff8811;
+  --border: #e8e1d9;
+  --input: #e8e1d9;
+  --ring: #ff8811;
   --radius: 0.75rem;
 }
 
 .dark {
-  --background: #171717; /* Dark Theme Main Color #171717 */
-  --foreground: #f5f5f5;
-  --card: #222222;
-  --card-foreground: #f5f5f5;
-  --popover: #222222;
-  --popover-foreground: #f5f5f5;
-  --primary: #fe9a00; /* Primary Brand Orange-Amber */
-  --primary-hover: #ffaa26;
-  --primary-foreground: #171717;
-  --secondary: #2a2a2a;
-  --secondary-foreground: #f5f5f5;
-  --muted: #292929;
-  --muted-foreground: #a3a3a3;
-  --accent: #2e2000;
-  --accent-foreground: #fe9a00;
-  --border: #333333;
-  --input: #333333;
-  --ring: #fe9a00;
+  /* Core Palette Tokens consistent in Dark Mode */
+  --primary: #ff8811;
+  --primary-hover: #ffa033;
+  --primary-foreground: #ffffff;
+
+  --secondary: #302d3f;
+  --secondary-hover: #3e3a51;
+  --secondary-foreground: #fff8f0;
+
+  --tertiary: #fff8f0;
+  --tertiary-hover: #ffffff;
+  --tertiary-foreground: #302d3f;
+
+  /* Theme Tokens for Dark Mode */
+  --background: #181622;
+  --foreground: #fff8f0;
+  --card: #232031;
+  --card-foreground: #fff8f0;
+  --popover: #232031;
+  --popover-foreground: #fff8f0;
+  --muted: #2c283c;
+  --muted-foreground: #a7a2b7;
+  --accent: #302d3f;
+  --accent-foreground: #ff8811;
+  --border: #3a364d;
+  --input: #3a364d;
+  --ring: #ff8811;
 }
 
 @theme {
-  --color-primary-brand: #fe9a00;
-  --color-dark-main: #171717;
-  --color-smoke-white: #f4f5f8;
+  --font-sans: var(--font-sora), 'Sora', system-ui, -apple-system, sans-serif;
+  --font-sora: 'Sora', sans-serif;
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-hover: var(--tertiary-hover);
+  --color-tertiary-foreground: var(--tertiary-foreground);
+
+  --color-brand-primary: var(--primary);
+  --color-brand-secondary: var(--secondary);
+  --color-brand-tertiary: var(--tertiary);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Fallback aliases for amber classes to map to primary & tertiary */
+  --color-amber-500: var(--primary);
+  --color-amber-400: var(--primary-hover);
+  --color-amber-600: var(--primary-hover);
+  --color-amber-50: var(--tertiary);
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-family: var(--font-sora), 'Sora', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Custom Primary Brand Color Classes */
+/* Custom Primary, Secondary & Tertiary Brand Utilities */
 .bg-brand-primary {
-  background-color: #fe9a00;
+  background-color: var(--primary);
 }
 .text-brand-primary {
-  color: #fe9a00;
+  color: var(--primary);
 }
 .border-brand-primary {
-  border-color: #fe9a00;
+  border-color: var(--primary);
+}
+
+.bg-brand-secondary {
+  background-color: var(--secondary);
+}
+.text-brand-secondary {
+  color: var(--secondary);
+}
+.border-brand-secondary {
+  border-color: var(--secondary);
+}
+
+.bg-brand-tertiary {
+  background-color: var(--tertiary);
+}
+.text-brand-tertiary {
+  color: var(--tertiary);
+}
+.border-brand-tertiary {
+  border-color: var(--tertiary);
 }
 
 /* Override default scrollbars and transitions for smooth mode switching */

@@ -8,17 +8,19 @@ export function cn_util(...inputs: any[]) {
 }
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer',
   {
     variants: {
       variant: {
-        default: 'bg-amber-500 text-slate-950 font-semibold hover:bg-amber-400 shadow-sm',
+        default: 'bg-primary text-primary-foreground font-semibold hover:bg-primary-hover shadow-sm',
         destructive: 'bg-rose-600 text-white hover:bg-rose-500 shadow-sm',
-        outline: 'border border-slate-200 dark:border-slate-800 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100',
-        secondary: 'bg-slate-900 text-slate-50 hover:bg-slate-800 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700',
-        ghost: 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200',
-        link: 'text-amber-600 underline-offset-4 hover:underline dark:text-amber-400',
-        amberOutline: 'border-2 border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30',
+        outline: 'border border-border bg-transparent hover:bg-muted text-foreground',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary-hover shadow-sm',
+        tertiary: 'bg-tertiary text-tertiary-foreground hover:bg-tertiary-hover shadow-sm',
+        ghost: 'hover:bg-muted text-foreground',
+        link: 'text-primary underline-offset-4 hover:underline',
+        amberOutline: 'border-2 border-primary text-primary hover:bg-primary/10',
+        primaryOutline: 'border-2 border-primary text-primary hover:bg-primary/10',
       },
       size: {
         default: 'h-10 px-4 py-2',

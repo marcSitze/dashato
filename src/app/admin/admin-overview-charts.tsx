@@ -26,8 +26,8 @@ const salesData = [
 ];
 
 const categoryDistribution = [
-  { name: 'Laptops & Computers', value: 45, color: '#f59e0b' },
-  { name: 'Audio & Headphones', value: 25, color: '#3b82f6' },
+  { name: 'Laptops & Computers', value: 45, color: '#ff8811' },
+  { name: 'Audio & Headphones', value: 25, color: '#302d3f' },
   { name: 'Home & Office', value: 20, color: '#10b981' },
   { name: 'Smart Wearables', value: 10, color: '#8b5cf6' },
 ];
@@ -36,13 +36,13 @@ export function AdminOverviewCharts() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       {/* Sales & Revenue Trend Chart */}
-      <div className="lg:col-span-8 bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+      <div className="lg:col-span-8 bg-card rounded-3xl p-6 border border-border shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
-            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">Gross Revenue & Growth Timeline</h3>
-            <p className="text-xs text-slate-400">Monthly revenue trend across all vendor stores</p>
+            <h3 className="font-bold text-card-foreground text-base">Gross Revenue & Growth Timeline</h3>
+            <p className="text-xs text-muted-foreground">Monthly revenue trend across all vendor stores</p>
           </div>
-          <span className="text-xs font-bold text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-xl">
+          <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-xl">
             2026 Financial Year
           </span>
         </div>
@@ -52,28 +52,28 @@ export function AdminOverviewCharts() {
             <AreaChart data={salesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#ff8811" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#ff8811" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
               <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
+                contentStyle={{ backgroundColor: '#302d3f', borderColor: '#3d394e', borderRadius: '12px', color: '#fff8f0', fontSize: '12px' }}
                 formatter={(val: any) => [`$${val.toLocaleString()}`, 'Revenue']}
               />
-              <Area type="monotone" dataKey="revenue" stroke="#f59e0b" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+              <Area type="monotone" dataKey="revenue" stroke="#ff8811" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Category Market Share Pie */}
-      <div className="lg:col-span-4 bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-        <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
-          <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">Category Market Share</h3>
-          <p className="text-xs text-slate-400">Department distribution by sales volume</p>
+      <div className="lg:col-span-4 bg-card rounded-3xl p-6 border border-border shadow-sm space-y-4">
+        <div className="border-b border-border pb-3">
+          <h3 className="font-bold text-card-foreground text-base">Category Market Share</h3>
+          <p className="text-xs text-muted-foreground">Department distribution by sales volume</p>
         </div>
 
         <div className="h-56 w-full flex items-center justify-center">
@@ -93,21 +93,21 @@ export function AdminOverviewCharts() {
                 ))}
               </Pie>
               <Tooltip
-                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
+                contentStyle={{ backgroundColor: '#302d3f', borderColor: '#3d394e', borderRadius: '12px', color: '#fff8f0', fontSize: '12px' }}
                 formatter={(val: any) => [`${val}%`, 'Share']}
               />
             </PieChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+        <div className="space-y-2 pt-2 border-t border-border text-xs">
           {categoryDistribution.map((c) => (
             <div key={c.name} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full" style={{ backgroundColor: c.color }} />
-                <span className="text-slate-600 dark:text-slate-300 font-medium">{c.name}</span>
+                <span className="text-muted-foreground font-medium">{c.name}</span>
               </div>
-              <span className="font-bold text-slate-900 dark:text-slate-100">{c.value}%</span>
+              <span className="font-bold text-card-foreground">{c.value}%</span>
             </div>
           ))}
         </div>
