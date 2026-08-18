@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Link from 'next/link';
+import * as React from "react";
+import Link from "next/link";
 import {
   Star,
   ShoppingBag,
@@ -16,28 +16,30 @@ import {
   Store,
   Share2,
   MessageSquare,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCartStore } from '@/store/cart-store';
-import { useWishlistStore } from '@/store/wishlist-store';
-import { useCompareStore } from '@/store/compare-store';
-import { useTranslation } from '@/lib/i18n/context';
-import { formatCurrency, formatDate } from '@/lib/utils';
-import { toast } from 'sonner';
+  Film,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { isVideoUrl } from "@/lib/media-utils";
+import { Spinner } from "@/components/ui/spinner";
+import { useCartStore } from "@/store/cart-store";
+import { useWishlistStore } from "@/store/wishlist-store";
+import { useCompareStore } from "@/store/compare-store";
+import { useTranslation } from "@/lib/i18n/context";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { toast } from "sonner";
 
 export function ProductDetailsClient({ product }: { product: any }) {
   const { t } = useTranslation();
-  const images = product.images.length > 0
-    ? product.images
-    : [{ url: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=1000&q=80' }];
+  const images = product.images.length > 0 ? product.images : [];
 
   const [selectedImage, setSelectedImage] = React.useState(images[0].url);
   const [selectedVariant, setSelectedVariant] = React.useState<any>(
-    product.variants.length > 0 ? product.variants[0] : null
+    product.variants.length > 0 ? product.variants[0] : null,
   );
   const [quantity, setQuantity] = React.useState(1);
+  const [isAdding, setIsAdding] = React.useState(false);
 
   const addItem = useCartStore((state) => state.addItem);
   const { toggleWishlist, isInWishlist } = useWishlistStore();
@@ -47,15 +49,23 @@ export function ProductDetailsClient({ product }: { product: any }) {
   const isCompared = isInCompare(product.id);
 
   const currentPrice = selectedVariant ? selectedVariant.price : product.price;
-  const currentCompareAtPrice = selectedVariant ? selectedVariant.compareAtPrice : product.compareAtPrice;
+  const currentCompareAtPrice = selectedVariant
+    ? selectedVariant.compareAtPrice
+    : product.compareAtPrice;
   const currentSku = selectedVariant ? selectedVariant.sku : product.sku;
   const currentStock = product.inventory?.quantity ?? 10;
-  const vendorStoreName = product.vendor.store?.name || product.vendor.businessName;
-  const vendorStoreSlug = product.vendor.store?.slug || 'vendor';
+  const vendorStoreName =
+    product.vendor.store?.name || product.vendor.businessName;
+  const vendorStoreSlug = product.vendor.store?.slug || "vendor";
 
-  const specs = product.specifications ? JSON.parse(product.specifications) : {};
+  const specs = product.specifications
+    ? JSON.parse(product.specifications)
+    : {};
+  const isSelectedVideo = isVideoUrl(selectedImage);
 
   const handleAddToCart = () => {
+    if (currentStock <= 0 || isAdding) return;
+    setIsAdding(true);
     addItem({
       productId: product.id,
       variantId: selectedVariant?.id,
@@ -73,6 +83,7 @@ export function ProductDetailsClient({ product }: { product: any }) {
       maxStock: currentStock,
     });
     toast.success(`Added ${quantity} item(s) to shopping cart!`);
+    setTimeout(() => setIsAdding(false), 500);
   };
 
   const handleWishlist = () => {
@@ -85,7 +96,7 @@ export function ProductDetailsClient({ product }: { product: any }) {
       vendorName: vendorStoreName,
       inStock: currentStock > 0,
     });
-    toast(isWishlisted ? 'Removed from wishlist' : 'Saved to wishlist');
+    toast(isWishlisted ? "Removed from wishlist" : "Saved to wishlist");
   };
 
   const handleCompare = () => {
@@ -101,7 +112,7 @@ export function ProductDetailsClient({ product }: { product: any }) {
       vendorName: vendorStoreName,
       specifications: specs,
     });
-    toast(isCompared ? 'Removed from comparison' : 'Added to comparison list');
+    toast(isCompared ? "Removed from comparison" : "Added to comparison list");
   };
 
   return (
@@ -110,15 +121,35 @@ export function ProductDetailsClient({ product }: { product: any }) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         {/* Gallery Thumbnails & Large Zoom Image */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="aspect-[4/3] rounded-3xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md relative group">
-            <img
-              src={selectedImage}
-              alt={product.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-zoom-in"
-            />
+          <div className="aspect-[4/3] rounded-3xl overflow-hidden bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md relative group">
+            {isSelectedVideo ? (
+              <video
+                src={selectedImage}
+                controls
+                autoPlay
+                muted
+                loop
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <img
+                src={selectedImage}
+                alt={product.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-zoom-in"
+              />
+            )}
             {currentCompareAtPrice && currentCompareAtPrice > currentPrice && (
-              <Badge variant="destructive" className="absolute top-4 left-4 font-bold text-sm">
-                Save {Math.round(((currentCompareAtPrice - currentPrice) / currentCompareAtPrice) * 100)}%
+              <Badge
+                variant="destructive"
+                className="absolute top-4 left-4 font-bold text-sm"
+              >
+                Save{" "}
+                {Math.round(
+                  ((currentCompareAtPrice - currentPrice) /
+                    currentCompareAtPrice) *
+                    100,
+                )}
+                %
               </Badge>
             )}
           </div>
@@ -126,19 +157,39 @@ export function ProductDetailsClient({ product }: { product: any }) {
           {/* Thumbnail Carousel */}
           {images.length > 1 && (
             <div className="flex items-center gap-3 overflow-x-auto pb-2">
-              {images.map((img: any, idx: number) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedImage(img.url)}
-                  className={`w-20 h-20 rounded-2xl overflow-hidden border-2 flex-shrink-0 transition-all ${
-                    selectedImage === img.url
-                      ? 'border-amber-500 ring-2 ring-amber-500/30'
-                      : 'border-slate-200 dark:border-slate-800 opacity-70 hover:opacity-100'
-                  }`}
-                >
-                  <img src={img.url} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
+              {images.map((img: any, idx: number) => {
+                const isVid = isVideoUrl(img.url);
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedImage(img.url)}
+                    className={`relative w-20 h-20 rounded-2xl overflow-hidden border-2 flex-shrink-0 transition-all ${
+                      selectedImage === img.url
+                        ? "border-amber-500 ring-2 ring-amber-500/30"
+                        : "border-slate-200 dark:border-slate-800 opacity-70 hover:opacity-100"
+                    }`}
+                  >
+                    {isVid ? (
+                      <>
+                        <video
+                          src={img.url}
+                          className="w-full h-full object-cover"
+                          muted
+                        />
+                        <div className="absolute inset-0 bg-slate-950/40 flex items-center justify-center">
+                          <Film className="w-5 h-5 text-amber-400" />
+                        </div>
+                      </>
+                    ) : (
+                      <img
+                        src={img.url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -148,9 +199,17 @@ export function ProductDetailsClient({ product }: { product: any }) {
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="font-bold text-slate-400 uppercase tracking-wider">
-                Brand: <Link href={`/products?brand=${product.brand?.slug}`} className="text-amber-600 hover:underline">{product.brand?.name || 'Generic'}</Link>
+                Brand:{" "}
+                <Link
+                  href={`/products?brand=${product.brand?.slug}`}
+                  className="text-amber-600 hover:underline"
+                >
+                  {product.brand?.name || "Generic"}
+                </Link>
               </span>
-              <span className="text-slate-400 font-mono">SKU: {currentSku}</span>
+              <span className="text-slate-400 font-mono">
+                SKU: {currentSku}
+              </span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 leading-tight">
@@ -164,13 +223,19 @@ export function ProductDetailsClient({ product }: { product: any }) {
                   <Star
                     key={i}
                     className={`w-4 h-4 ${
-                      i < Math.floor(product.avgRating) ? 'fill-amber-400' : 'text-slate-300 dark:text-slate-700'
+                      i < Math.floor(product.avgRating)
+                        ? "fill-amber-400"
+                        : "text-slate-300 dark:text-slate-700"
                     }`}
                   />
                 ))}
               </div>
-              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{product.avgRating.toFixed(1)}</span>
-              <span className="text-xs text-slate-400">({product.reviewCount} customer reviews)</span>
+              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                {product.avgRating.toFixed(1)}
+              </span>
+              <span className="text-xs text-slate-400">
+                ({product.reviewCount} customer reviews)
+              </span>
             </div>
           </div>
 
@@ -180,21 +245,29 @@ export function ProductDetailsClient({ product }: { product: any }) {
               <span className="text-3xl font-black text-slate-900 dark:text-slate-50">
                 {formatCurrency(currentPrice)}
               </span>
-              {currentCompareAtPrice && currentCompareAtPrice > currentPrice && (
-                <span className="text-sm text-slate-400 line-through ml-2">
-                  {formatCurrency(currentCompareAtPrice)}
-                </span>
-              )}
+              {currentCompareAtPrice &&
+                currentCompareAtPrice > currentPrice && (
+                  <span className="text-sm text-slate-400 line-through ml-2">
+                    {formatCurrency(currentCompareAtPrice)}
+                  </span>
+                )}
             </div>
-            <Badge variant={currentStock > 0 ? 'success' : 'destructive'} className="font-bold">
-              {currentStock > 0 ? `${t.inStock} (${currentStock} left)` : t.outOfStock}
+            <Badge
+              variant={currentStock > 0 ? "success" : "destructive"}
+              className="font-bold"
+            >
+              {currentStock > 0
+                ? `${t.inStock} (${currentStock} left)`
+                : t.outOfStock}
             </Badge>
           </div>
 
           {/* Variant Selection */}
           {product.variants.length > 0 && (
             <div className="space-y-2">
-              <label className="text-xs font-extrabold uppercase text-slate-500">Select Variant</label>
+              <label className="text-xs font-extrabold uppercase text-slate-500">
+                Select Variant
+              </label>
               <div className="grid grid-cols-2 gap-2">
                 {product.variants.map((v: any) => (
                   <button
@@ -205,12 +278,14 @@ export function ProductDetailsClient({ product }: { product: any }) {
                     }}
                     className={`p-3 rounded-xl border text-left text-xs font-semibold transition-all ${
                       selectedVariant?.id === v.id
-                        ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 font-bold'
-                        : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300'
+                        ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 font-bold"
+                        : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300"
                     }`}
                   >
                     <div>{v.title}</div>
-                    <div className="text-slate-500 font-bold mt-0.5">{formatCurrency(v.price)}</div>
+                    <div className="text-slate-500 font-bold mt-0.5">
+                      {formatCurrency(v.price)}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -227,9 +302,13 @@ export function ProductDetailsClient({ product }: { product: any }) {
                 >
                   <Minus className="w-4 h-4" />
                 </button>
-                <span className="px-4 font-bold text-sm text-slate-900 dark:text-slate-100">{quantity}</span>
+                <span className="px-4 font-bold text-sm text-slate-900 dark:text-slate-100">
+                  {quantity}
+                </span>
                 <button
-                  onClick={() => setQuantity(Math.min(currentStock, quantity + 1))}
+                  onClick={() =>
+                    setQuantity(Math.min(currentStock, quantity + 1))
+                  }
                   className="p-3 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
                 >
                   <Plus className="w-4 h-4" />
@@ -238,11 +317,21 @@ export function ProductDetailsClient({ product }: { product: any }) {
 
               <Button
                 onClick={handleAddToCart}
-                disabled={currentStock <= 0}
+                disabled={currentStock <= 0 || isAdding}
                 size="lg"
                 className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-base shadow-lg shadow-amber-500/20"
               >
-                <ShoppingBag className="w-5 h-5 mr-2" /> {t.addToCart}
+                {isAdding ? (
+                  <>
+                    <Spinner size="sm" variant="primary" className="mr-2" />
+                    <span>Adding to Cart...</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="w-5 h-5 mr-2" />
+                    <span>{t.addToCart}</span>
+                  </>
+                )}
               </Button>
             </div>
 
@@ -252,20 +341,24 @@ export function ProductDetailsClient({ product }: { product: any }) {
                 onClick={handleWishlist}
                 variant="outline"
                 className={`flex-1 rounded-xl text-xs font-bold ${
-                  isWishlisted ? 'border-rose-500 text-rose-600 bg-rose-50' : ''
+                  isWishlisted ? "border-rose-500 text-rose-600 bg-rose-50" : ""
                 }`}
               >
-                <Heart className="w-4 h-4 mr-1.5 fill-current" /> {isWishlisted ? 'Saved in Wishlist' : 'Add to Wishlist'}
+                <Heart className="w-4 h-4 mr-1.5 fill-current" />{" "}
+                {isWishlisted ? "Saved in Wishlist" : "Add to Wishlist"}
               </Button>
 
               <Button
                 onClick={handleCompare}
                 variant="outline"
                 className={`flex-1 rounded-xl text-xs font-bold ${
-                  isCompared ? 'border-amber-500 text-amber-600 bg-amber-50' : ''
+                  isCompared
+                    ? "border-amber-500 text-amber-600 bg-amber-50"
+                    : ""
                 }`}
               >
-                <Scale className="w-4 h-4 mr-1.5" /> {isCompared ? 'In Compare List' : 'Compare Product'}
+                <Scale className="w-4 h-4 mr-1.5" />{" "}
+                {isCompared ? "In Compare List" : "Compare Product"}
               </Button>
             </div>
           </div>
@@ -284,7 +377,11 @@ export function ProductDetailsClient({ product }: { product: any }) {
                 </div>
               </div>
               <Link href={`/products?vendor=${product.vendorId}`}>
-                <Button size="sm" variant="outline" className="text-xs rounded-lg h-8">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs rounded-lg h-8"
+                >
                   {t.visitStore}
                 </Button>
               </Link>
@@ -313,30 +410,51 @@ export function ProductDetailsClient({ product }: { product: any }) {
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
         <Tabs defaultValue="description">
           <TabsList className="w-full justify-start border-b border-slate-200 dark:border-slate-800 rounded-none bg-transparent h-auto p-0 gap-6">
-            <TabsTrigger value="description" className="rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent py-3 text-sm font-bold">
+            <TabsTrigger
+              value="description"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent py-3 text-sm font-bold"
+            >
               {t.description}
             </TabsTrigger>
-            <TabsTrigger value="specs" className="rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent py-3 text-sm font-bold">
+            <TabsTrigger
+              value="specs"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent py-3 text-sm font-bold"
+            >
               {t.specifications}
             </TabsTrigger>
-            <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent py-3 text-sm font-bold">
+            <TabsTrigger
+              value="reviews"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-amber-500 data-[state=active]:bg-transparent py-3 text-sm font-bold"
+            >
               {t.reviews} ({product.reviews.length})
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="description" className="pt-6 space-y-4 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+          <TabsContent
+            value="description"
+            className="pt-6 space-y-4 text-slate-700 dark:text-slate-300 text-sm leading-relaxed"
+          >
             <p>{product.description}</p>
           </TabsContent>
 
           <TabsContent value="specs" className="pt-6">
             {Object.keys(specs).length === 0 ? (
-              <p className="text-slate-400 text-sm">No detailed specifications provided.</p>
+              <p className="text-slate-400 text-sm">
+                No detailed specifications provided.
+              </p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(specs).map(([key, val]: [string, any]) => (
-                  <div key={key} className="flex justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm">
-                    <span className="font-semibold text-slate-600 dark:text-slate-400">{key}</span>
-                    <span className="font-bold text-slate-900 dark:text-slate-100">{val}</span>
+                  <div
+                    key={key}
+                    className="flex justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm"
+                  >
+                    <span className="font-semibold text-slate-600 dark:text-slate-400">
+                      {key}
+                    </span>
+                    <span className="font-bold text-slate-900 dark:text-slate-100">
+                      {val}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -345,7 +463,9 @@ export function ProductDetailsClient({ product }: { product: any }) {
 
           <TabsContent value="reviews" className="pt-6 space-y-6">
             {product.reviews.length === 0 ? (
-              <p className="text-slate-400 text-sm">No reviews yet for this product. Be the first to leave feedback!</p>
+              <p className="text-slate-400 text-sm">
+                No reviews yet for this product. Be the first to leave feedback!
+              </p>
             ) : (
               <div className="space-y-4 divide-y divide-slate-100 dark:divide-slate-800">
                 {product.reviews.map((rev: any) => (
@@ -353,27 +473,44 @@ export function ProductDetailsClient({ product }: { product: any }) {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-xs">
-                          {rev.user?.name ? rev.user.name[0] : 'U'}
+                          {rev.user?.name ? rev.user.name[0] : "U"}
                         </div>
                         <div>
-                          <span className="font-bold text-sm text-slate-900 dark:text-slate-100">{rev.user?.name}</span>
+                          <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                            {rev.user?.name}
+                          </span>
                           <div className="flex items-center text-amber-400 text-xs">
                             {Array.from({ length: 5 }).map((_, i) => (
-                              <Star key={i} className={`w-3 h-3 ${i < rev.rating ? 'fill-amber-400' : 'text-slate-300'}`} />
+                              <Star
+                                key={i}
+                                className={`w-3 h-3 ${i < rev.rating ? "fill-amber-400" : "text-slate-300"}`}
+                              />
                             ))}
                           </div>
                         </div>
                       </div>
-                      <span className="text-xs text-slate-400">{formatDate(rev.createdAt)}</span>
+                      <span className="text-xs text-slate-400">
+                        {formatDate(rev.createdAt)}
+                      </span>
                     </div>
 
-                    {rev.title && <h5 className="font-bold text-sm text-slate-900 dark:text-slate-100">{rev.title}</h5>}
-                    <p className="text-xs text-slate-600 dark:text-slate-300">{rev.comment}</p>
+                    {rev.title && (
+                      <h5 className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                        {rev.title}
+                      </h5>
+                    )}
+                    <p className="text-xs text-slate-600 dark:text-slate-300">
+                      {rev.comment}
+                    </p>
 
                     {rev.vendorReply && (
                       <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-1">
-                        <span className="font-bold text-amber-600 dark:text-amber-400">Response from {vendorStoreName}:</span>
-                        <p className="text-slate-700 dark:text-slate-300">{rev.vendorReply}</p>
+                        <span className="font-bold text-amber-600 dark:text-amber-400">
+                          Response from {vendorStoreName}:
+                        </span>
+                        <p className="text-slate-700 dark:text-slate-300">
+                          {rev.vendorReply}
+                        </p>
                       </div>
                     )}
                   </div>

@@ -16,7 +16,7 @@ export const createProductSchema = z.object({
   isBestSeller: z.boolean().default(false),
   isNewArrival: z.boolean().default(true),
   images: z.array(z.object({
-    url: z.string().url(),
+    url: z.string().min(1, 'Image URL or path is required'),
     alt: z.string().optional(),
     isMain: z.boolean().default(false),
   })).min(1, 'At least one product image is required'),
