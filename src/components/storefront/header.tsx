@@ -179,7 +179,7 @@ export function Header({ categories = [] }: { categories?: CategoryItem[] }) {
                     <button
                       onClick={() => {
                         setMobileMenuOpen(false);
-                        signOut();
+                        signOut({ callbackUrl: '/login' });
                       }}
                       className="w-full flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors"
                     >
@@ -399,7 +399,7 @@ export function Header({ categories = [] }: { categories?: CategoryItem[] }) {
                         <Package className="w-4 h-4 mr-2 text-muted-foreground" /> {t.myAccount}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => signOut()} className="text-rose-600">
+                      <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/login' })} className="text-rose-600 font-bold">
                         <LogOut className="w-4 h-4 mr-2" /> {t.signOut}
                       </DropdownMenuItem>
                     </>

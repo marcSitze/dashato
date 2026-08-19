@@ -1,9 +1,7 @@
 import Link from 'next/link';
 import { db } from '@/lib/db';
-import { Package, Plus, Search, Filter, CheckCircle, ShieldAlert, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/lib/utils';
 
 export interface AdminProductsPageProps {
@@ -14,24 +12,34 @@ export interface AdminProductsPageProps {
 }
 
 export default async function AdminProductsPage({ searchParams }: AdminProductsPageProps) {
-  const { status, q } = await searchParams;
+  const resolvedParams = (await searchParams) || {};
+  const status = resolvedParams.status;
+  const q = resolvedParams.q;
 
-  const where: any = {};
-  if (status) where.status = status;
-  if (q) {
-    where.OR = [{ title: { contains: q } }, { sku: { contains: q } }];
+  let products: any[] = [];
+
+  try {
+    const where: any = {};
+    if (status) where.status = status;
+    if (q) {
+      where.OR = [{ title: { contains: q } }, { sku: { contains: q } }];
+    }
+
+    const rawProducts = await db.product.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        images: true,
+        brand: true,
+        vendor: { include: { store: true } },
+        inventory: true,
+      },
+    });
+
+    products = JSON.parse(JSON.stringify(rawProducts || []));
+  } catch (err) {
+    console.error('Error fetching admin products directory:', err);
   }
-
-  const products = await db.product.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    include: {
-      images: true,
-      brand: true,
-      vendor: { include: { store: true } },
-      inventory: true,
-    },
-  });
 
   return (
     <div className="space-y-6">
@@ -42,7 +50,7 @@ export default async function AdminProductsPage({ searchParams }: AdminProductsP
             <p className="text-sm text-slate-500">Manage catalog inventory, pricing, and multi-vendor approvals</p>
           </div>
           <Link href="/admin/products/new">
-            <Button className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs px-4">
+            <Button className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs px-4 shadow-sm">
               + Add New Product
             </Button>
           </Link>
@@ -95,9 +103,9 @@ export default async function AdminProductsPage({ searchParams }: AdminProductsP
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3">
                       <img
-                        src={p.images[0]?.url || 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=100&q=80'}
+                        src={p.images?.[0]?.url || 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=100&q=80'}
                         alt=""
-                        className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-800"
+                        className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-800 bg-slate-950"
                       />
                       <div>
                         <Link href={`/products/${p.slug}`} target="_blank" className="font-bold text-slate-900 dark:text-slate-100 hover:text-amber-500 line-clamp-1">
@@ -109,7 +117,7 @@ export default async function AdminProductsPage({ searchParams }: AdminProductsP
                   </td>
                   <td className="py-3.5 px-4 font-mono font-semibold text-slate-600 dark:text-slate-400">{p.sku}</td>
                   <td className="py-3.5 px-4 font-bold text-slate-800 dark:text-slate-200">
-                    {p.vendor.store?.name || p.vendor.businessName}
+                    {p.vendor?.store?.name || p.vendor?.businessName || 'Marketplace'}
                   </td>
                   <td className="py-3.5 px-4 font-extrabold text-slate-900 dark:text-slate-100">{formatCurrency(p.price)}</td>
                   <td className="py-3.5 px-4">

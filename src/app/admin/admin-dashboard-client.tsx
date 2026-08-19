@@ -173,7 +173,7 @@ export function AdminDashboardClient({
               {recentOrders.map((ord: any) => (
                 <tr key={ord.id} className="hover:bg-slate-50 dark:hover:bg-slate-950 transition-colors">
                   <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-slate-100">{ord.orderNumber}</td>
-                  <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300">{ord.user.name}</td>
+                  <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300">{ord.user?.name || ord.user?.email || 'Customer'}</td>
                   <td className="py-3.5 px-4 text-slate-500">{formatDate(ord.createdAt)}</td>
                   <td className="py-3.5 px-4">
                     <Badge variant="success" className="text-[10px] font-bold uppercase">

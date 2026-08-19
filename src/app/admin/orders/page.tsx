@@ -1,21 +1,28 @@
 import Link from 'next/link';
 import { db } from '@/lib/db';
-import { ShoppingCart, Truck, CreditCard, User, ChevronRight, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
 export default async function AdminOrdersPage() {
-  const orders = await db.order.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: {
-      user: true,
-      items: { include: { product: true, vendor: { include: { store: true } } } },
-      shipments: true,
-      payments: true,
-      commissions: { include: { vendor: true } },
-    },
-  });
+  let orders: any[] = [];
+
+  try {
+    const rawOrders = await db.order.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        items: { include: { product: true, vendor: { include: { store: true } } } },
+        shipments: true,
+        payments: true,
+        commissions: { include: { vendor: true } },
+      },
+    });
+
+    orders = JSON.parse(JSON.stringify(rawOrders || []));
+  } catch (err) {
+    console.error('Error fetching admin orders directory:', err);
+  }
 
   return (
     <div className="space-y-6">
@@ -47,14 +54,14 @@ export default async function AdminOrdersPage() {
                 <tr key={ord.id} className="hover:bg-slate-50 dark:hover:bg-slate-950 transition-colors">
                   <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-slate-100">{ord.orderNumber}</td>
                   <td className="py-3.5 px-4">
-                    <div className="font-bold text-slate-900 dark:text-slate-100">{ord.user.name}</div>
-                    <div className="text-[10px] text-slate-400">{ord.user.email}</div>
+                    <div className="font-bold text-slate-900 dark:text-slate-100">{ord.user?.name || 'Customer'}</div>
+                    <div className="text-[10px] text-slate-400">{ord.user?.email || 'N/A'}</div>
                   </td>
                   <td className="py-3.5 px-4">
                     <div className="space-y-1">
-                      {ord.items.map((it: any) => (
+                      {ord.items?.map((it: any) => (
                         <div key={it.id} className="text-[11px] text-slate-600 dark:text-slate-300">
-                          • {it.product.title.substring(0, 30)}... (Store: {it.vendor.store?.name || it.vendor.businessName})
+                          • {it.product?.title ? `${it.product.title.substring(0, 30)}...` : 'Product'} (Store: {it.vendor?.store?.name || it.vendor?.businessName || 'Marketplace'})
                         </div>
                       ))}
                     </div>

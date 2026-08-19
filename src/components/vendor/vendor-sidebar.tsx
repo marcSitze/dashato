@@ -9,67 +9,80 @@ import {
   LayoutDashboard,
   Package,
   FolderTree,
-  Tag,
   ShoppingCart,
   Boxes,
-  Store,
-  Users,
-  Percent,
-  Star,
   LogOut,
+  Store,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-interface AdminSidebarProps {
+interface VendorSidebarProps {
   user: {
     name?: string | null;
     email?: string | null;
   };
+  vendorStore?: {
+    name?: string;
+    logo?: string;
+    rating?: number;
+  } | null;
 }
 
-export function AdminSidebar({ user }: AdminSidebarProps) {
+export function VendorSidebar({ user, vendorStore }: VendorSidebarProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
 
   const navLinks = [
-    { name: t.adminDashboardOverview || 'Dashboard Overview', href: '/admin', icon: LayoutDashboard },
-    { name: t.adminProductDirectory || 'Product Directory', href: '/admin/products', icon: Package },
-    { name: t.adminCategoriesHierarchy || 'Categories Hierarchy', href: '/admin/categories', icon: FolderTree },
-    { name: t.adminBrandPartners || 'Brand Partners', href: '/admin/brands', icon: Tag },
-    { name: t.adminOrderManagement || 'Order Management', href: '/admin/orders', icon: ShoppingCart },
-    { name: t.adminInventoryStockLogs || 'Inventory & Stock Logs', href: '/admin/inventory', icon: Boxes },
-    { name: t.adminVendorApplications || 'Vendor Applications & Fees', href: '/admin/vendors', icon: Store },
-    { name: t.adminUserManagement || 'User Management', href: '/admin/users', icon: Users },
-    { name: t.adminCouponsFlashSales || 'Coupons & Flash Sales', href: '/admin/promotions', icon: Percent },
-    { name: t.adminReviewModeration || 'Review Moderation', href: '/admin/reviews', icon: Star },
+    { name: t.vendorDashboardNav || 'Seller Dashboard', href: '/vendor', icon: LayoutDashboard },
+    { name: t.vendorProductsNav || 'My Store Products', href: '/vendor/products', icon: Package },
+    { name: t.vendorOrdersNav || 'Store Orders & Fulfillment', href: '/vendor/orders', icon: ShoppingCart },
+    { name: t.vendorCategoriesNav || 'Categories Catalog', href: '/vendor/categories', icon: FolderTree },
+    { name: t.vendorInventoryNav || 'Stock Control', href: '/vendor/inventory', icon: Boxes },
   ];
 
   return (
     <aside className="w-72 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-800 flex flex-col flex-shrink-0 hidden lg:flex">
-      {/* Logo Section */}
+      {/* Logo & Badge Header */}
       <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-        <Link href="/admin" className="flex items-center gap-2">
+        <Link href="/vendor" className="flex items-center gap-2">
           <img
             src="/Dashato_logo_light_mode.png"
-            alt="Dashato Admin"
+            alt="Dashato Vendor"
             className="h-8 w-auto dark:hidden object-contain"
           />
           <img
             src="/Dashato_logo_dark_mode.png"
-            alt="Dashato Admin"
+            alt="Dashato Vendor"
             className="h-8 w-auto hidden dark:block object-contain"
           />
         </Link>
-        <span className="text-[10px] font-bold text-amber-600 dark:text-primary uppercase bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-          {t.adminBadge || 'Admin'}
+        <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+          {t.vendorBadge || 'Seller Center'}
         </span>
+      </div>
+
+      {/* Vendor Store Card */}
+      <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+        <div className="flex items-center gap-3">
+          <img
+            src={vendorStore?.logo || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=100&q=80'}
+            alt=""
+            className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-800"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate">
+              {vendorStore?.name || 'Seller Store'}
+            </p>
+            <p className="text-[10px] text-amber-500 font-semibold">★ {vendorStore?.rating || 4.9} Store Rating</p>
+          </div>
+        </div>
       </div>
 
       {/* Navigation Menu Links */}
       <div className="flex-1 p-4 space-y-1 overflow-y-auto">
         {navLinks.map((link) => {
           const Icon = link.icon;
-          const isActive = pathname === link.href || (link.href !== '/admin' && pathname?.startsWith(link.href));
+          const isActive = pathname === link.href || (link.href !== '/vendor' && pathname?.startsWith(link.href));
 
           return (
             <Link
@@ -88,15 +101,15 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
         })}
       </div>
 
-      {/* User Card & Storefront Direct Link */}
+      {/* User Card & Logout Action */}
       <div className="p-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
         <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs">
           <div className="w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-extrabold flex items-center justify-center">
-            {user.name ? user.name.charAt(0).toUpperCase() : 'A'}
+            {user.name ? user.name.charAt(0).toUpperCase() : 'V'}
           </div>
           <div className="truncate">
             <p className="font-bold text-slate-900 dark:text-slate-100 truncate">{user.name}</p>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400">{t.adminSystemPlatformOwner || 'System Platform Owner'}</p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400">Verified Marketplace Partner</p>
           </div>
         </div>
 

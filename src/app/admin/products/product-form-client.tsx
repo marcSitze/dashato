@@ -16,6 +16,14 @@ import { toast } from "sonner";
 
 import { MediaUploader } from "@/components/admin/media-uploader";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface ProductFormClientProps {
   initialData?: any;
@@ -26,6 +34,9 @@ interface ProductFormClientProps {
     businessName: string;
     store?: { name: string } | null;
   }[];
+  isVendorUser?: boolean;
+  userVendorId?: string;
+  redirectPath?: string;
 }
 
 export function ProductFormClient({
@@ -33,9 +44,17 @@ export function ProductFormClient({
   categories,
   brands,
   vendors,
+  isVendorUser = false,
+  userVendorId,
+  redirectPath,
 }: ProductFormClientProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [categoryList, setCategoryList] = React.useState(categories);
+  const [newCatModalOpen, setNewCatModalOpen] = React.useState(false);
+  const [newCatName, setNewCatName] = React.useState('');
+  const [newCatDesc, setNewCatDesc] = React.useState('');
+  const [isCreatingCat, setIsCreatingCat] = React.useState(false);
 
   const [title, setTitle] = React.useState(initialData?.title || "");
   const [description, setDescription] = React.useState(
@@ -56,11 +75,46 @@ export function ProductFormClient({
   const [categoryId, setCategoryId] = React.useState(
     initialData?.categories?.[0]?.categoryId || categories[0]?.id || "",
   );
+
+  const handleQuickAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCatName.trim()) return;
+
+    setIsCreatingCat(true);
+    try {
+      const slug = newCatName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newCatName.trim(),
+          slug,
+          description: newCatDesc.trim() || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to create category');
+      }
+
+      toast.success(`Category "${data.data.name}" created!`);
+      setCategoryList((prev) => [...prev, data.data]);
+      setCategoryId(data.data.id);
+      setNewCatName('');
+      setNewCatDesc('');
+      setNewCatModalOpen(false);
+    } catch (err: any) {
+      toast.error(err.message || 'Category creation error');
+    } finally {
+      setIsCreatingCat(false);
+    }
+  };
   const [brandId, setBrandId] = React.useState(
     initialData?.brandId || brands[0]?.id || "",
   );
   const [vendorId, setVendorId] = React.useState(
-    initialData?.vendorId || vendors[0]?.id || "",
+    userVendorId || initialData?.vendorId || vendors[0]?.id || ""
   );
   const [status, setStatus] = React.useState(initialData?.status || "ACTIVE");
   const [quantity, setQuantity] = React.useState(
@@ -127,7 +181,8 @@ export function ProductFormClient({
           ? "Product updated successfully!"
           : "Product created successfully!",
       );
-      router.push("/admin/products");
+      const targetPath = redirectPath || (isVendorUser ? "/vendor/products" : "/admin/products");
+      router.push(targetPath);
       router.refresh();
     } catch (err: any) {
       toast.error(err.message || "Product save error");
@@ -262,15 +317,24 @@ export function ProductFormClient({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Category *
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Category *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setNewCatModalOpen(true)}
+                  className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" /> Quick Add Category
+                </button>
+              </div>
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
                 className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-xs font-bold"
               >
-                {categories.map((c) => (
+                {categoryList.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>
@@ -296,13 +360,21 @@ export function ProductFormClient({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Fulfilling Vendor Store *
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Fulfilling Vendor Store *
+                </label>
+                {(isVendorUser || userVendorId) && (
+                  <span className="text-[10px] font-extrabold uppercase text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                    Locked to your store
+                  </span>
+                )}
+              </div>
               <select
                 value={vendorId}
                 onChange={(e) => setVendorId(e.target.value)}
-                className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-xs font-bold"
+                disabled={isVendorUser || !!userVendorId}
+                className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-xs font-bold disabled:opacity-80 disabled:cursor-not-allowed"
               >
                 {vendors.map((v) => (
                   <option key={v.id} value={v.id}>
@@ -343,6 +415,74 @@ export function ProductFormClient({
           </Button>
         </div>
       </form>
+
+      {/* Quick Add Category Dialog Modal */}
+      <Dialog open={newCatModalOpen} onOpenChange={setNewCatModalOpen}>
+        <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-extrabold text-slate-900 dark:text-slate-100">
+              Quick Create Category
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Add a new category to the marketplace catalog for products.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleQuickAddCategory} className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                Category Name *
+              </label>
+              <Input
+                type="text"
+                required
+                placeholder="e.g. Smart Audio & Sound"
+                value={newCatName}
+                onChange={(e) => setNewCatName(e.target.value)}
+                className="h-10 text-sm rounded-xl font-bold bg-slate-50 dark:bg-slate-950"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                Description (Optional)
+              </label>
+              <Input
+                type="text"
+                placeholder="Brief summary of department items..."
+                value={newCatDesc}
+                onChange={(e) => setNewCatDesc(e.target.value)}
+                className="h-10 text-xs rounded-xl bg-slate-50 dark:bg-slate-950"
+              />
+            </div>
+
+            <DialogFooter className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setNewCatModalOpen(false)}
+                className="rounded-xl text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isCreatingCat}
+                className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs px-6 shadow-sm"
+              >
+                {isCreatingCat ? (
+                  <>
+                    <Spinner size="sm" variant="primary" className="mr-2" />
+                    <span>Creating...</span>
+                  </>
+                ) : (
+                  'Create Category'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

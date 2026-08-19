@@ -19,6 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { SignOutButton } from '@/components/auth/sign-out-button';
 
 export default async function CustomerDashboardPage() {
   const user = await getCurrentUser();
@@ -68,9 +69,15 @@ export default async function CustomerDashboardPage() {
               <Link href="/account/wishlist" className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
                 <Heart className="w-4 h-4" /> Wishlist ({wishlistCount})
               </Link>
+
               <Link href="/account/addresses" className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
                 <MapPin className="w-4 h-4" /> Saved Addresses
               </Link>
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <SignOutButton className="w-full justify-start text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 font-bold rounded-xl text-xs px-3 py-2">
+                  Sign Out & Logout
+                </SignOutButton>
+              </div>
             </nav>
           </div>
 

@@ -4,12 +4,12 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n/context';
+import { signOut } from 'next-auth/react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { LanguageToggle } from '@/components/language-toggle';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { signOut } from 'next-auth/react';
 import {
   Search,
   Bell,
@@ -17,44 +17,35 @@ import {
   LayoutDashboard,
   Package,
   FolderTree,
-  Tag,
   ShoppingCart,
   Boxes,
-  Store,
-  Users,
-  Percent,
-  Star,
   LogOut,
+  Plus,
 } from 'lucide-react';
 
-interface AdminHeaderProps {
+interface VendorHeaderProps {
   user: {
     name?: string | null;
     email?: string | null;
   };
 }
 
-export function AdminHeader({ user }: AdminHeaderProps) {
+export function VendorHeader({ user }: VendorHeaderProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const [sheetOpen, setSheetOpen] = React.useState(false);
 
   const navLinks = [
-    { name: t.adminDashboardOverview || 'Dashboard Overview', href: '/admin', icon: LayoutDashboard },
-    { name: t.adminProductDirectory || 'Product Directory', href: '/admin/products', icon: Package },
-    { name: t.adminCategoriesHierarchy || 'Categories Hierarchy', href: '/admin/categories', icon: FolderTree },
-    { name: t.adminBrandPartners || 'Brand Partners', href: '/admin/brands', icon: Tag },
-    { name: t.adminOrderManagement || 'Order Management', href: '/admin/orders', icon: ShoppingCart },
-    { name: t.adminInventoryStockLogs || 'Inventory & Stock Logs', href: '/admin/inventory', icon: Boxes },
-    { name: t.adminVendorApplications || 'Vendor Applications & Fees', href: '/admin/vendors', icon: Store },
-    { name: t.adminUserManagement || 'User Management', href: '/admin/users', icon: Users },
-    { name: t.adminCouponsFlashSales || 'Coupons & Flash Sales', href: '/admin/promotions', icon: Percent },
-    { name: t.adminReviewModeration || 'Review Moderation', href: '/admin/reviews', icon: Star },
+    { name: t.vendorDashboardNav || 'Seller Dashboard', href: '/vendor', icon: LayoutDashboard },
+    { name: t.vendorProductsNav || 'My Store Products', href: '/vendor/products', icon: Package },
+    { name: t.vendorOrdersNav || 'Store Orders & Fulfillment', href: '/vendor/orders', icon: ShoppingCart },
+    { name: t.vendorCategoriesNav || 'Categories Catalog', href: '/vendor/categories', icon: FolderTree },
+    { name: t.vendorInventoryNav || 'Stock Control', href: '/vendor/inventory', icon: Boxes },
   ];
 
   return (
     <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 flex items-center justify-between gap-4">
-      {/* Mobile Drawer Trigger & Search Input */}
+      {/* Mobile Drawer & Search */}
       <div className="flex items-center gap-3 max-w-md w-full">
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
@@ -67,12 +58,12 @@ export function AdminHeader({ user }: AdminHeaderProps) {
               <SheetTitle>
                 <img
                   src="/Dashato_logo_light_mode.png"
-                  alt="Dashato Admin"
+                  alt="Dashato Vendor"
                   className="h-8 w-auto dark:hidden object-contain"
                 />
                 <img
                   src="/Dashato_logo_dark_mode.png"
-                  alt="Dashato Admin"
+                  alt="Dashato Vendor"
                   className="h-8 w-auto hidden dark:block object-contain"
                 />
               </SheetTitle>
@@ -80,7 +71,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
             <div className="p-4 space-y-1 overflow-y-auto">
               {navLinks.map((link) => {
                 const Icon = link.icon;
-                const isActive = pathname === link.href || (link.href !== '/admin' && pathname?.startsWith(link.href));
+                const isActive = pathname === link.href || (link.href !== '/vendor' && pathname?.startsWith(link.href));
 
                 return (
                   <Link
@@ -106,26 +97,31 @@ export function AdminHeader({ user }: AdminHeaderProps) {
           <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
           <Input
             type="text"
-            placeholder={t.adminSearchPlaceholder || 'Search orders, SKU, users...'}
+            placeholder={t.vendorSearchPlaceholder || 'Search store products, orders, SKU...'}
             className="h-9 text-xs pl-9 rounded-xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-foreground shadow-none"
           />
         </div>
       </div>
 
-      {/* Right Action Bar */}
+      {/* Right Controls */}
       <div className="flex items-center gap-2 sm:gap-3">
+        <Link href="/vendor/products/new" className="hidden sm:block">
+          <Button size="sm" className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs px-3 shadow-sm h-8">
+            <Plus className="w-3.5 h-3.5 mr-1" /> Product
+          </Button>
+        </Link>
         <LanguageToggle />
         <ThemeToggle />
-        
+
         <Button variant="ghost" size="icon" className="relative hidden sm:flex hover:bg-slate-100 dark:hover:bg-slate-800">
           <Bell className="w-5 h-5 text-foreground" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500" />
         </Button>
 
         <div className="flex items-center gap-2 text-xs border-l border-slate-200 dark:border-slate-800 pl-2 sm:pl-3">
           <span className="font-bold text-foreground truncate max-w-[100px] sm:max-w-none">{user.name}</span>
-          <span className="hidden md:inline-block text-[10px] font-extrabold uppercase text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-            {t.adminBadge || 'Admin'}
+          <span className="hidden md:inline-block text-[10px] font-extrabold uppercase text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+            {t.vendorBadge || 'Seller'}
           </span>
           <Button
             variant="ghost"

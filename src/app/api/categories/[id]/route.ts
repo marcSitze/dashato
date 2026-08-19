@@ -29,15 +29,15 @@ export async function GET(
   }
 }
 
-// PUT /api/categories/[id] - Update category (RBAC: Admin only)
+// PUT /api/categories/[id] - Update category (RBAC: Admin or Vendor)
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 403 });
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'VENDOR')) {
+      return NextResponse.json({ error: 'Unauthorized: Admin or Vendor access required' }, { status: 403 });
     }
 
     const { id } = await params;

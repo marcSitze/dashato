@@ -21,12 +21,12 @@ export async function GET() {
   }
 }
 
-// POST /api/categories - Create category (RBAC: Admin only)
+// POST /api/categories - Create category (RBAC: Admin or Vendor)
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 403 });
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'VENDOR')) {
+      return NextResponse.json({ error: 'Unauthorized: Vendor or Admin access required' }, { status: 403 });
     }
 
     const body = await request.json();
