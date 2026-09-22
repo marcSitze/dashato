@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
-import { paymentProvider } from '@/lib/payment';
 import { NotificationService } from '@/lib/notifications';
 
 export async function POST(request: Request) {
@@ -80,21 +79,7 @@ export async function POST(request: Request) {
     const taxFee = (serverSubtotal - discountTotal) * 0.08;
     const grandTotal = serverSubtotal - discountTotal + taxFee + shippingFee;
 
-    // 3. Process Payment via Abstract Gateway
-    const paymentResult = await paymentProvider.createPaymentIntent({
-      orderId: 'pending',
-      orderNumber: `DSH-${Date.now()}`,
-      amount: grandTotal,
-      currency: 'usd',
-      customerEmail: shippingAddress.email || user?.email || 'customer@example.com',
-      items: items.map((i: any) => ({ name: i.title, quantity: i.quantity, unitPrice: i.price })),
-    });
-
-    if (!paymentResult.success) {
-      return NextResponse.json({ error: paymentResult.message || 'Payment processing failed' }, { status: 400 });
-    }
-
-    // 4. Atomic Database Transaction
+    // 3. Atomic Database Transaction
     const orderNumber = `DSH-${Date.now().toString().substring(3)}`;
 
     const newOrder = await db.$transaction(async (tx: any) => {
@@ -128,12 +113,12 @@ export async function POST(request: Request) {
         },
       });
 
-      // Create main Order
+      // Create main Order with PENDING status for WhatsApp processing
       const order = await tx.order.create({
         data: {
           orderNumber,
           userId: targetUserId,
-          status: 'PAYMENT_CONFIRMED',
+          status: 'PENDING',
           subtotal: serverSubtotal,
           shippingFee,
           taxFee,
@@ -147,11 +132,11 @@ export async function POST(request: Request) {
           },
           payments: {
             create: {
-              provider: paymentResult.provider,
-              transactionId: paymentResult.transactionId,
+              provider: 'WHATSAPP',
+              transactionId: `wa_tx_${orderNumber}`,
               amount: grandTotal,
-              status: 'COMPLETED',
-              paymentMethod: paymentMethod || 'CARD',
+              status: 'PENDING',
+              paymentMethod: 'WHATSAPP_DIRECT',
             },
           },
         },
@@ -176,7 +161,7 @@ export async function POST(request: Request) {
               inventoryId: inv.id,
               type: 'SALE',
               quantity: -item.quantity,
-              reason: `Order ${orderNumber}`,
+              reason: `WhatsApp Order ${orderNumber}`,
             },
           });
         }
@@ -204,11 +189,58 @@ export async function POST(request: Request) {
       return order;
     });
 
+    // 4. Construct Well-Structured WhatsApp Message for Shop Owner
+    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+15550192834';
+    const cleanPhone = whatsappNumber.replace(/[^0-9]/g, '');
+
+    const itemsListText = items.map((item: any, idx: number) => {
+      const storeText = item.vendorName ? `\n   • Store: ${item.vendorName}` : '';
+      const variantText = item.variantTitle ? `\n   • Variant: ${item.variantTitle}` : '';
+      return `${idx + 1}. *${item.title}*
+   • Qty: ${item.quantity} × $${Number(item.price).toFixed(2)} = $${(Number(item.price) * item.quantity).toFixed(2)}${variantText}${storeText}`;
+    }).join('\n\n');
+
+    const shippingMethodTitle = shippingMethod === 'EXPRESS'
+      ? 'Express Air Courier ($19.99)'
+      : shippingMethod === 'OVERNIGHT'
+      ? 'Overnight Priority ($34.99)'
+      : `Standard Courier Shipping (${shippingFee === 0 ? 'FREE' : '$9.99'})`;
+
+    const whatsappMessageText = `🛍️ *NEW ORDER - #${orderNumber}*
+----------------------------------
+👤 *Customer Details:*
+• *Name:* ${shippingAddress.fullName}
+• *Email:* ${shippingAddress.email || 'N/A'}
+• *Phone:* ${shippingAddress.phoneNumber || 'N/A'}
+
+📍 *Delivery Address:*
+${shippingAddress.street}${shippingAddress.apartment ? `, ${shippingAddress.apartment}` : ''}
+${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.postalCode}, ${shippingAddress.country || 'US'}
+
+🚚 *Shipping Method:*
+${shippingMethodTitle}
+
+📦 *Products Ordered:*
+${itemsListText}
+
+----------------------------------
+💰 *Order Summary:*
+• Subtotal: $${serverSubtotal.toFixed(2)}
+• Shipping: ${shippingFee === 0 ? 'FREE' : `$${shippingFee.toFixed(2)}`}
+• Tax (8%): $${taxFee.toFixed(2)}
+${discountTotal > 0 ? `• Discount (${couponCode}): -$${discountTotal.toFixed(2)}\n` : ''}• *GRAND TOTAL:* *$${grandTotal.toFixed(2)}*
+----------------------------------
+📌 *Status:* Submitted via WhatsApp Direct Checkout
+
+Please confirm this order. Thank you!`;
+
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMessageText)}`;
+
     // Send Notification
     await NotificationService.send({
       userId: newOrder.userId,
-      title: `Order ${newOrder.orderNumber} Confirmed!`,
-      message: `Thank you for your order. Total paid: $${grandTotal.toFixed(2)}.`,
+      title: `Order ${newOrder.orderNumber} Submitted!`,
+      message: `Your order has been formatted and sent to the shop owner via WhatsApp. Total: $${grandTotal.toFixed(2)}.`,
       type: 'ORDER',
       link: `/account/orders/${newOrder.id}`,
     });
@@ -217,6 +249,8 @@ export async function POST(request: Request) {
       success: true,
       orderNumber: newOrder.orderNumber,
       orderId: newOrder.id,
+      whatsappUrl,
+      whatsappMessageText,
     });
   } catch (error: any) {
     console.error('Checkout error:', error);

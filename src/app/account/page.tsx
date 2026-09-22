@@ -23,21 +23,33 @@ import { SignOutButton } from '@/components/auth/sign-out-button';
 
 export default async function CustomerDashboardPage() {
   const user = await getCurrentUser();
-
   const customerId = user?.id || '';
 
-  const [ordersCount, wishlistCount, recentOrders] = await Promise.all([
-    db.order.count({ where: { userId: customerId } }),
-    db.wishlistItem.count({ where: { wishlist: { userId: customerId } } }),
-    db.order.findMany({
-      where: { userId: customerId },
-      orderBy: { createdAt: 'desc' },
-      take: 3,
-      include: {
-        items: { include: { product: true } },
-      },
-    }),
-  ]);
+  let ordersCount = 0;
+  let wishlistCount = 0;
+  let recentOrders: any[] = [];
+
+  if (customerId) {
+    try {
+      const [oCount, wCount, rOrders] = await Promise.all([
+        db.order.count({ where: { userId: customerId } }),
+        db.wishlistItem.count({ where: { wishlist: { userId: customerId } } }),
+        db.order.findMany({
+          where: { userId: customerId },
+          orderBy: { createdAt: 'desc' },
+          take: 3,
+          include: {
+            items: { include: { product: true } },
+          },
+        }),
+      ]);
+      ordersCount = oCount;
+      wishlistCount = wCount;
+      recentOrders = rOrders;
+    } catch (err) {
+      console.error('Customer dashboard db fetch error:', err);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">

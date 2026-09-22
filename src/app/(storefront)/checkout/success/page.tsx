@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { AnnouncementBar } from '@/components/storefront/announcement-bar';
 import { Header } from '@/components/storefront/header';
 import { Footer } from '@/components/storefront/footer';
-import { CheckCircle2, Package, ArrowRight, Printer, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, Package, ArrowRight, MessageSquare, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
@@ -11,11 +11,12 @@ export interface CheckoutSuccessPageProps {
   searchParams: Promise<{
     orderNumber?: string;
     orderId?: string;
+    whatsappUrl?: string;
   }>;
 }
 
 export default async function CheckoutSuccessPage({ searchParams }: CheckoutSuccessPageProps) {
-  const { orderNumber, orderId } = await searchParams;
+  const { orderNumber, orderId, whatsappUrl } = await searchParams;
 
   const order = orderId
     ? await db.order.findUnique({
@@ -27,6 +28,8 @@ export default async function CheckoutSuccessPage({ searchParams }: CheckoutSucc
         },
       })
     : null;
+
+  const targetWhatsappUrl = whatsappUrl ? decodeURIComponent(whatsappUrl) : null;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-between">
@@ -40,8 +43,8 @@ export default async function CheckoutSuccessPage({ searchParams }: CheckoutSucc
           </div>
 
           <div className="space-y-2">
-            <span className="text-xs font-extrabold uppercase text-emerald-600 dark:text-emerald-400 tracking-wider">
-              Payment Confirmed
+            <span className="text-xs font-extrabold uppercase text-emerald-600 dark:text-emerald-400 tracking-wider flex items-center justify-center gap-1.5">
+              <MessageSquare className="w-3.5 h-3.5" /> Order Sent to Shop Owner
             </span>
             <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
               Thank You For Your Order!
@@ -51,6 +54,19 @@ export default async function CheckoutSuccessPage({ searchParams }: CheckoutSucc
             </p>
           </div>
 
+          {targetWhatsappUrl && (
+            <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 text-center space-y-2">
+              <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                Your order details were formatted for WhatsApp. If WhatsApp did not launch automatically:
+              </p>
+              <a href={targetWhatsappUrl} target="_blank" rel="noopener noreferrer">
+                <Button className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl px-6 text-xs gap-2">
+                  <ExternalLink className="w-4 h-4" /> Open WhatsApp Chat with Shop Owner
+                </Button>
+              </a>
+            </div>
+          )}
+
           {order && (
             <div className="text-left bg-slate-50 dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 text-xs">
               <div className="flex justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
@@ -59,7 +75,7 @@ export default async function CheckoutSuccessPage({ searchParams }: CheckoutSucc
                   <span className="font-bold ml-1 text-slate-900 dark:text-slate-100">{formatDate(order.createdAt)}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400">Total Paid:</span>
+                  <span className="text-slate-400">Total Amount:</span>
                   <span className="font-black ml-1 text-amber-600 dark:text-amber-400">{formatCurrency(order.grandTotal)}</span>
                 </div>
               </div>
@@ -79,7 +95,7 @@ export default async function CheckoutSuccessPage({ searchParams }: CheckoutSucc
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link href="/account/orders">
               <Button size="lg" className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl px-6 text-sm">
-                <Package className="w-4 h-4 mr-2" /> Track Order Status
+                <Package className="w-4 h-4 mr-2" /> View Account Orders
               </Button>
             </Link>
 

@@ -123,7 +123,7 @@ export function CartDrawer() {
 
               <div className="flex items-center justify-center gap-2 text-[11px] text-slate-500 text-center">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Encrypted & Safe Checkout via Stripe Architecture</span>
+                <span>Direct WhatsApp Business Order Dispatch</span>
               </div>
             </div>
           </>

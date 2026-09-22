@@ -12,16 +12,23 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 
 export default async function CustomerOrdersPage() {
   const user = await getCurrentUser();
+  let orders: any[] = [];
 
-  const orders = await db.order.findMany({
-    where: { userId: user?.id || '' },
-    orderBy: { createdAt: 'desc' },
-    include: {
-      items: { include: { product: true, vendor: { include: { store: true } } } },
-      shipments: true,
-      payments: true,
-    },
-  });
+  if (user?.id) {
+    try {
+      orders = await db.order.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          items: { include: { product: true, vendor: { include: { store: true } } } },
+          shipments: true,
+          payments: true,
+        },
+      });
+    } catch (err) {
+      console.error('Customer orders page db error:', err);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">

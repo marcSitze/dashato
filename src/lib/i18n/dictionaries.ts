@@ -77,8 +77,8 @@ export const dictionaries = {
     couponPlaceholder: 'Enter promo code (e.g. DASHATO10)',
     proceedToCheckout: 'Proceed to Checkout',
     checkoutTitle: 'Express Checkout',
-    placeOrder: 'Place Order & Pay',
-    encryptedCheckout: 'Encrypted & Safe Checkout via Stripe Architecture',
+    placeOrder: 'Place Order via WhatsApp',
+    encryptedCheckout: 'Direct WhatsApp Business Order Dispatch',
 
     // Footer
     trustShipping: 'Free Global Shipping',
