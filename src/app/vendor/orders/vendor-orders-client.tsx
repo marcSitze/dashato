@@ -2,11 +2,12 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n/context';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { Truck, CheckCircle2, Search, Filter, Loader2, PackageCheck } from 'lucide-react';
+import { Truck, CheckCircle2, Search, Loader2, PackageCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface VendorOrdersClientProps {
@@ -15,6 +16,7 @@ interface VendorOrdersClientProps {
 
 export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [items, setItems] = React.useState<any[]>(initialOrderItems);
   const [filterStatus, setFilterStatus] = React.useState<string>('ALL');
   const [searchQuery, setSearchQuery] = React.useState<string>('');
@@ -32,14 +34,13 @@ export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProp
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fulfillmentStatus: status,
-          carrier: 'Express Air Courier',
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to update order status');
+        throw new Error(data.error || 'Erreur lors de la mise à jour du statut');
       }
 
       // Update local state immediately
@@ -51,13 +52,13 @@ export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProp
 
       toast.success(
         status === 'SHIPPED'
-          ? 'Order item marked as SHIPPED successfully!'
-          : `Fulfillment status updated to ${status}`
+          ? (t.orderMarkedShippedToast || 'Article marqué comme EXPÉDIÉ avec succès !')
+          : (t.orderMarkedDeliveredToast || 'Article marqué comme LIVRÉ avec succès !')
       );
 
       router.refresh();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to update shipment status');
+      toast.error(err.message || 'Impossible de mettre à jour le statut');
     } finally {
       setLoadingItemId(null);
     }
@@ -85,29 +86,37 @@ export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProp
       case 'SHIPPED':
         return (
           <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold uppercase text-[10px] gap-1">
-            <CheckCircle2 className="w-3 h-3" /> SHIPPED
+            <CheckCircle2 className="w-3 h-3" /> {t.shippedStatus || 'EXPÉDIÉ'}
           </Badge>
         );
       case 'DELIVERED':
         return (
           <Badge className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 font-bold uppercase text-[10px] gap-1">
-            <PackageCheck className="w-3 h-3" /> DELIVERED
+            <PackageCheck className="w-3 h-3" /> {t.deliveredStatus || 'LIVRÉ'}
           </Badge>
         );
       case 'PROCESSING':
         return (
           <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-bold uppercase text-[10px]">
-            PROCESSING
+            {t.processingStatus || 'EN COURS'}
           </Badge>
         );
       default:
         return (
           <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold uppercase text-[10px]">
-            UNFULFILLED
+            {t.unfulfilledStatus || 'EN ATTENTE'}
           </Badge>
         );
     }
   };
+
+  const statusFilters = [
+    { key: 'ALL', label: t.all || 'Tous' },
+    { key: 'UNFULFILLED', label: t.unfulfilledStatus || 'En Attente' },
+    { key: 'PROCESSING', label: t.processingStatus || 'En Cours' },
+    { key: 'SHIPPED', label: t.shippedStatus || 'Expédié' },
+    { key: 'DELIVERED', label: t.deliveredStatus || 'Livré' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -117,7 +126,7 @@ export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProp
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <Input
             type="text"
-            placeholder="Search order #, customer, product..."
+            placeholder={t.vendorSearchPlaceholder || 'Rechercher commande n°, client, produit...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 rounded-xl text-xs"
@@ -125,42 +134,42 @@ export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProp
         </div>
 
         <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/60 p-1 rounded-2xl w-full sm:w-auto overflow-x-auto text-xs font-semibold">
-          {['ALL', 'UNFULFILLED', 'PROCESSING', 'SHIPPED', 'DELIVERED'].map((st) => (
+          {statusFilters.map((st) => (
             <button
-              key={st}
-              onClick={() => setFilterStatus(st)}
+              key={st.key}
+              onClick={() => setFilterStatus(st.key)}
               className={`px-3 py-1.5 rounded-xl transition-all capitalize ${
-                filterStatus === st
+                filterStatus === st.key
                   ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-sm font-bold'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              {st.toLowerCase()}
+              {st.label}
             </button>
           ))}
         </div>
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm max-w-full">
+        <div className="overflow-x-auto smooth-scroll-x rounded-2xl w-full">
+          <table className="w-full min-w-[700px] text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase font-bold text-[10px]">
-                <th className="py-3 px-4">Order #</th>
-                <th className="py-3 px-4">Customer Details</th>
-                <th className="py-3 px-4">Product Purchased</th>
-                <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4">Fulfillment Status</th>
-                <th className="py-3 px-4">Subtotal</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-4">{t.orderNum || 'Commande N°'}</th>
+                <th className="py-3 px-4">{t.customerDetails || 'Détails du Client'}</th>
+                <th className="py-3 px-4">{t.productPurchased || 'Produit Acheté'}</th>
+                <th className="py-3 px-4">{t.dateLabel || 'Date'}</th>
+                <th className="py-3 px-4">{t.fulfillmentStatus || 'Statut de Livraison'}</th>
+                <th className="py-3 px-4">{t.subtotal || 'Sous-total'}</th>
+                <th className="py-3 px-4 text-right">{t.actions || 'Actions'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredItems.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-slate-400">
-                    No order items match your search or filter criteria.
+                    {t.noStoreOrdersYet || 'Aucun article de commande ne correspond à vos critères de recherche.'}
                   </td>
                 </tr>
               ) : (
@@ -174,12 +183,12 @@ export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProp
                         {item.order?.orderNumber || 'N/A'}
                       </td>
                       <td className="py-3.5 px-4">
-                        <div className="font-bold text-slate-900 dark:text-slate-100">{item.order?.user?.name || 'Customer'}</div>
+                        <div className="font-bold text-slate-900 dark:text-slate-100">{item.order?.user?.name || 'Client'}</div>
                         <div className="text-[10px] text-slate-400">{item.order?.user?.email || 'N/A'}</div>
                       </td>
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-slate-800 dark:text-slate-200">{item.product?.title || 'Product'}</div>
-                        <div className="text-[10px] text-slate-400">Qty: {item.quantity} • Unit: {formatCurrency(item.unitPrice)}</div>
+                        <div className="font-semibold text-slate-800 dark:text-slate-200">{item.product?.title || 'Produit'}</div>
+                        <div className="text-[10px] text-slate-400">{t.qty || 'Qté'}: {item.quantity} • {formatCurrency(item.unitPrice)}</div>
                       </td>
                       <td className="py-3.5 px-4 text-slate-500">{formatDate(item.createdAt)}</td>
                       <td className="py-3.5 px-4">
@@ -202,7 +211,7 @@ export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProp
                             ) : (
                               <PackageCheck className="w-3.5 h-3.5 text-purple-500" />
                             )}
-                            {item.fulfillmentStatus === 'DELIVERED' ? 'Delivered' : 'Mark Delivered'}
+                            {item.fulfillmentStatus === 'DELIVERED' ? (t.deliveredStatus || 'Livré') : (t.markDelivered || 'Marquer Livré')}
                           </Button>
                         ) : (
                           <Button
@@ -216,7 +225,7 @@ export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProp
                             ) : (
                               <Truck className="w-3.5 h-3.5" />
                             )}
-                            Mark Shipped
+                            {t.markShipped || 'Marquer Expédié'}
                           </Button>
                         )}
                       </td>
@@ -231,3 +240,4 @@ export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProp
     </div>
   );
 }
+

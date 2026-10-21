@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Star, Heart, ShoppingBag, Eye, Scale, Check } from 'lucide-react';
+import { Star, Heart, ShoppingBag, Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/store/cart-store';
@@ -20,7 +20,7 @@ export interface ProductCardProps {
   compareAtPrice?: number | null;
   images: { url: string; alt?: string | null }[];
   brand?: { name: string; slug: string } | null;
-  vendor: { id: string; store?: { name: string; slug: string } | null };
+  vendor: { id: string; store?: { name: string; slug: string } | null; businessName?: string };
   avgRating: number;
   reviewCount: number;
   isNewArrival?: boolean;
@@ -54,8 +54,7 @@ export function ProductCard({
   const isCompared = isInCompare(id);
 
   const mainImage = images[0]?.url || 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=600&q=80';
-  const hoverImage = images[1]?.url || mainImage;
-  const vendorName = vendor.store?.name || 'Verified Vendor';
+  const vendorName = vendor.store?.name || vendor.businessName || t.seller;
   const storeSlug = vendor.store?.slug || 'vendor';
   const stock = inventory?.quantity ?? 10;
 
@@ -80,7 +79,7 @@ export function ProductCard({
       storeSlug,
       maxStock: stock,
     });
-    toast.success(`Added "${title.substring(0, 25)}..." to cart!`);
+    toast.success(t.addedToCartToast);
   };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
@@ -95,7 +94,7 @@ export function ProductCard({
       vendorName,
       inStock: stock > 0,
     });
-    toast(isWishlisted ? 'Removed from wishlist' : 'Saved to wishlist');
+    toast(isWishlisted ? t.removedFromWishlistToast : t.savedToWishlistToast);
   };
 
   const handleCompareToggle = (e: React.MouseEvent) => {
@@ -112,11 +111,11 @@ export function ProductCard({
       reviewCount,
       vendorName,
     });
-    toast(isCompared ? 'Removed from comparison' : 'Added to comparison list');
+    toast(isCompared ? t.removedFromCompareToast : t.addedToCompareToast);
   };
 
   return (
-    <div className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+    <div className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-200 flex flex-col h-full">
       {/* Image Container with Hover zoom & Action Overlays */}
       <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
         <Link href={`/products/${slug}`} className="block w-full h-full">
@@ -146,8 +145,8 @@ export function ProductCard({
           )}
         </div>
 
-        {/* Quick Action Icon Buttons */}
-        <div className="absolute top-3 right-3 flex flex-col gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        {/* Quick Action Icon Buttons - visible on mobile touch, hover on desktop */}
+        <div className="absolute top-3 right-3 flex flex-col gap-1.5 z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
           <button
             onClick={handleWishlistToggle}
             className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-colors ${
@@ -155,7 +154,7 @@ export function ProductCard({
                 ? 'bg-rose-500 text-white'
                 : 'bg-card/90 text-card-foreground hover:bg-rose-500 hover:text-white'
             }`}
-            title="Add to Wishlist"
+            title={t.wishlist}
           >
             <Heart className="w-4 h-4 fill-current" />
           </button>
@@ -167,7 +166,7 @@ export function ProductCard({
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-card/90 text-card-foreground hover:bg-primary hover:text-primary-foreground'
             }`}
-            title="Compare Product"
+            title={t.addedToCompareToast}
           >
             <Scale className="w-4 h-4" />
           </button>
@@ -179,7 +178,7 @@ export function ProductCard({
         <div>
           {/* Vendor Badge */}
           <div className="flex items-center justify-between text-[11px] mb-1">
-            <span className="text-muted-foreground font-medium truncate">{brand?.name || 'Generic'}</span>
+            <span className="text-muted-foreground font-medium truncate">{brand?.name || 'Dashato'}</span>
             <span className="text-primary font-bold bg-primary/10 px-2 py-0.5 rounded truncate max-w-[120px]">
               {vendorName}
             </span>

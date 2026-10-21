@@ -3,10 +3,12 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { AnnouncementBar } from '@/components/storefront/announcement-bar';
 import { Header } from '@/components/storefront/header';
 import { Footer } from '@/components/storefront/footer';
 import { useCartStore } from '@/store/cart-store';
+import { useTranslation } from '@/lib/i18n/context';
 import {
   ShieldCheck,
   Truck,
@@ -25,23 +27,36 @@ import { toast } from 'sonner';
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const { t } = useTranslation();
   const { items, couponCode, getSubtotal, getTax, getShippingFee, getDiscountTotal, getGrandTotal, clearCart } = useCartStore();
 
   const [step, setStep] = React.useState<1 | 2 | 3>(1);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  // Address State
+  // Address State - cleanly initialized without fake static data
   const [shippingAddress, setShippingAddress] = React.useState({
-    fullName: 'Sarah Jenkins',
-    email: 'sarah@example.com',
-    phoneNumber: '+1 (555) 234-5678',
-    street: '742 Evergreen Terrace',
-    apartment: 'Apt 4B',
-    city: 'Springfield',
-    state: 'IL',
-    postalCode: '62704',
-    country: 'US',
+    fullName: session?.user?.name || '',
+    email: session?.user?.email || '',
+    phoneNumber: '',
+    street: '',
+    apartment: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: '',
   });
+
+  // Sync session user details if they arrive after mount
+  React.useEffect(() => {
+    if (session?.user) {
+      setShippingAddress((prev) => ({
+        ...prev,
+        fullName: prev.fullName || session.user.name || '',
+        email: prev.email || session.user.email || '',
+      }));
+    }
+  }, [session]);
 
   // Shipping Method State
   const [shippingMethod, setShippingMethod] = React.useState<'STANDARD' | 'EXPRESS' | 'OVERNIGHT'>('STANDARD');
@@ -52,11 +67,11 @@ export default function CheckoutPage() {
         <AnnouncementBar />
         <Header />
         <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-4">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Your cart is empty</h2>
-          <p className="text-sm text-slate-500">Please add items to your cart before proceeding to checkout.</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{t.emptyCart}</h2>
+          <p className="text-sm text-slate-500">{t.emptyCartSubtitle}</p>
           <Link href="/products">
             <Button className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl">
-              Browse Products
+              {t.browseProducts}
             </Button>
           </Link>
         </div>
@@ -66,6 +81,12 @@ export default function CheckoutPage() {
   }
 
   const handleProcessOrder = async () => {
+    if (!shippingAddress.fullName || !shippingAddress.street || !shippingAddress.phoneNumber) {
+      toast.error(t.orderFailedToast);
+      setStep(1);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const res = await fetch('/api/checkout/process', {
@@ -82,10 +103,10 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to complete order');
+        throw new Error(data.error || t.orderFailedToast);
       }
 
-      toast.success(`Order ${data.orderNumber} placed & formatted for WhatsApp!`);
+      toast.success(t.orderPlacedSuccessToast);
 
       // Launch WhatsApp with pre-structured order details
       if (data.whatsappUrl) {
@@ -95,7 +116,7 @@ export default function CheckoutPage() {
       clearCart();
       router.push(`/checkout/success?orderNumber=${data.orderNumber}&orderId=${data.orderId}&whatsappUrl=${encodeURIComponent(data.whatsappUrl || '')}`);
     } catch (err: any) {
-      toast.error(err.message || 'Checkout failed');
+      toast.error(err.message || t.orderFailedToast);
     } finally {
       setIsSubmitting(false);
     }
@@ -110,14 +131,14 @@ export default function CheckoutPage() {
         {/* Checkout Header Steps Indicator */}
         <div className="mb-10 text-center max-w-2xl mx-auto space-y-4">
           <div className="flex items-center justify-center gap-1.5 text-xs font-extrabold uppercase text-emerald-600 dark:text-emerald-400 tracking-widest bg-emerald-50 dark:bg-emerald-950/50 py-1.5 px-4 rounded-full w-fit mx-auto border border-emerald-500/20">
-            <MessageSquare className="w-3.5 h-3.5" /> Direct WhatsApp Business Order Dispatch
+            <MessageSquare className="w-3.5 h-3.5" /> {t.directWhatsAppDispatch}
           </div>
 
-          <div className="flex items-center justify-between relative max-w-sm mx-auto pt-2">
+          <div className="flex items-center justify-between relative max-w-sm mx-auto pt-2 px-2 sm:px-4">
             {[
-              { id: 1, label: 'Address' },
-              { id: 2, label: 'Shipping' },
-              { id: 3, label: 'Review & Send' },
+              { id: 1, label: t.addressStep },
+              { id: 2, label: t.shippingStep },
+              { id: 3, label: t.reviewStep },
             ].map((s) => (
               <div key={s.id} className="flex flex-col items-center relative z-10">
                 <div
@@ -137,86 +158,94 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-full">
           {/* Main Form Box */}
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-8 space-y-6 min-w-0 max-w-full">
             {/* STEP 1: Shipping Address */}
             {step === 1 && (
-              <Card className="rounded-3xl border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
+              <Card className="rounded-3xl border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-sm space-y-6 max-w-full">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-amber-500" /> Step 1: Shipping Address
+                  <MapPin className="w-5 h-5 text-amber-500" /> {t.step1Title}
                 </h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Full Name</label>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">{t.fullName}</label>
                     <Input
                       value={shippingAddress.fullName}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, fullName: e.target.value })}
+                      placeholder="Jean Dupont"
                       className="rounded-xl"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Email Address</label>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">{t.emailAddress}</label>
                     <Input
                       type="email"
                       value={shippingAddress.email}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, email: e.target.value })}
+                      placeholder="client@exemple.fr"
                       className="rounded-xl"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Phone Number (WhatsApp)</label>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">{t.phoneNumberWhatsApp}</label>
                     <Input
                       value={shippingAddress.phoneNumber}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, phoneNumber: e.target.value })}
+                      placeholder="+33 6 12 34 56 78"
                       className="rounded-xl"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Street Address</label>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">{t.streetAddress}</label>
                     <Input
                       value={shippingAddress.street}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, street: e.target.value })}
+                      placeholder="12 rue de la Paix"
                       className="rounded-xl"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Apartment / Suite (Optional)</label>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">{t.apartmentSuite}</label>
                     <Input
                       value={shippingAddress.apartment}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, apartment: e.target.value })}
+                      placeholder="Bâtiment B, Apt 14"
                       className="rounded-xl"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">City</label>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">{t.city}</label>
                     <Input
                       value={shippingAddress.city}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
+                      placeholder="Paris"
                       className="rounded-xl"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">State / Province</label>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">{t.stateRegion}</label>
                     <Input
                       value={shippingAddress.state}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}
+                      placeholder="Île-de-France"
                       className="rounded-xl"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Postal / Zip Code</label>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">{t.postalCode}</label>
                     <Input
                       value={shippingAddress.postalCode}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, postalCode: e.target.value })}
+                      placeholder="75001"
                       className="rounded-xl"
                     />
                   </div>
@@ -227,7 +256,7 @@ export default function CheckoutPage() {
                     onClick={() => setStep(2)}
                     className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl px-6"
                   >
-                    Continue to Shipping Method <ArrowRight className="w-4 h-4 ml-2" />
+                    {t.continue} <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
               </Card>
@@ -237,14 +266,14 @@ export default function CheckoutPage() {
             {step === 2 && (
               <Card className="rounded-3xl border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Truck className="w-5 h-5 text-amber-500" /> Step 2: Shipping Method
+                  <Truck className="w-5 h-5 text-amber-500" /> {t.step2Title}
                 </h2>
 
                 <div className="space-y-3">
                   {[
-                    { id: 'STANDARD', title: 'Standard Courier Shipping', desc: 'Delivered in 3-5 business days', price: getSubtotal() >= 150 ? 'FREE' : '$9.99' },
-                    { id: 'EXPRESS', title: 'Express Air Courier', desc: 'Delivered in 1-2 business days with tracking priority', price: '$19.99' },
-                    { id: 'OVERNIGHT', title: 'Overnight Priority', desc: 'Guaranteed next business day delivery', price: '$34.99' },
+                    { id: 'STANDARD', title: t.standardCourier, desc: '3-5 jours ouvrés', price: getSubtotal() >= 150 ? t.free : '$9.99' },
+                    { id: 'EXPRESS', title: t.expressAir, desc: '1-2 jours ouvrés', price: '$19.99' },
+                    { id: 'OVERNIGHT', title: t.overnightPriority, desc: 'Livraison le jour ouvré suivant', price: '$34.99' },
                   ].map((m) => (
                     <div
                       key={m.id}
@@ -271,13 +300,13 @@ export default function CheckoutPage() {
 
                 <div className="flex justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
                   <Button variant="outline" onClick={() => setStep(1)} className="rounded-xl">
-                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                    <ArrowLeft className="w-4 h-4 mr-2" /> {t.back}
                   </Button>
                   <Button
                     onClick={() => setStep(3)}
                     className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl px-6"
                   >
-                    Review Final Order <ArrowRight className="w-4 h-4 ml-2" />
+                    {t.reviewStep} <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
               </Card>
@@ -287,34 +316,34 @@ export default function CheckoutPage() {
             {step === 3 && (
               <Card className="rounded-3xl border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500" /> Step 3: Final Order Review & WhatsApp Dispatch
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500" /> {t.step3Title}
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                   <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1">
-                    <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Customer & Address</h4>
+                    <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{t.addressStep}</h4>
                     <p className="font-semibold">{shippingAddress.fullName}</p>
                     <p>{shippingAddress.street}{shippingAddress.apartment ? `, ${shippingAddress.apartment}` : ''}</p>
                     <p>{shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}</p>
-                    <p className="pt-1 text-slate-500">Phone: {shippingAddress.phoneNumber}</p>
-                    <p className="text-slate-500">Email: {shippingAddress.email}</p>
+                    <p className="pt-1 text-slate-500">{t.phoneNumberWhatsApp}: {shippingAddress.phoneNumber}</p>
+                    <p className="text-slate-500">{t.emailAddress}: {shippingAddress.email}</p>
                   </div>
 
                   <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-500/20 space-y-1.5">
                     <h4 className="font-bold text-emerald-700 dark:text-emerald-400 text-sm flex items-center gap-1.5">
-                      <MessageSquare className="w-4 h-4" /> Direct WhatsApp Dispatch
+                      <MessageSquare className="w-4 h-4" /> {t.directWhatsAppDispatch}
                     </h4>
                     <p className="text-slate-600 dark:text-slate-300">
-                      Your order will be formatted with full product details and sent directly to our WhatsApp Business account for rapid processing.
+                      {t.whatsAppAutoNotice}
                     </p>
                     <p className="text-slate-500 pt-1">
-                      Carrier: <strong className="text-slate-900 dark:text-slate-100">{shippingMethod}</strong>
+                      {t.shipping}: <strong className="text-slate-900 dark:text-slate-100">{shippingMethod}</strong>
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">Order Items ({items.length})</h4>
+                  <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">{t.orderedItemsLabel} ({items.length})</h4>
                   <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 bg-white dark:bg-slate-900">
                     {items.map((i) => (
                       <div key={i.id} className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between text-xs">
@@ -322,7 +351,7 @@ export default function CheckoutPage() {
                           <img src={i.image} alt="" className="w-10 h-10 rounded-lg object-cover" />
                           <div>
                             <p className="font-bold text-slate-900 dark:text-slate-100 line-clamp-1">{i.title}</p>
-                            <p className="text-slate-500">Qty: {i.quantity} • Store: {i.vendorName}</p>
+                            <p className="text-slate-500">{t.qty}: {i.quantity} • {t.store}: {i.vendorName}</p>
                           </div>
                         </div>
                         <span className="font-extrabold text-slate-900 dark:text-slate-100">
@@ -335,7 +364,7 @@ export default function CheckoutPage() {
 
                 <div className="flex justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
                   <Button variant="outline" onClick={() => setStep(2)} className="rounded-xl">
-                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                    <ArrowLeft className="w-4 h-4 mr-2" /> {t.back}
                   </Button>
                   <Button
                     onClick={handleProcessOrder}
@@ -343,10 +372,10 @@ export default function CheckoutPage() {
                     className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl px-8 text-base shadow-lg shadow-emerald-600/20 flex items-center gap-2"
                   >
                     {isSubmitting ? (
-                      'Formatting Order...'
+                      t.processingOrder
                     ) : (
                       <>
-                        <Send className="w-4 h-4" /> Send Order via WhatsApp ({formatCurrency(getGrandTotal())})
+                        <Send className="w-4 h-4" /> {t.placeOrderWhatsApp} ({formatCurrency(getGrandTotal())})
                       </>
                     )}
                   </Button>
@@ -359,36 +388,36 @@ export default function CheckoutPage() {
           <div className="lg:col-span-4 space-y-4">
             <Card className="rounded-3xl border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-4">
               <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base border-b border-slate-100 dark:border-slate-800 pb-3">
-                Summary Total
+                {t.orderSummary}
               </h3>
 
               <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
                 <div className="flex justify-between">
-                  <span>Subtotal</span>
+                  <span>{t.subtotal}</span>
                   <span className="font-bold text-slate-900 dark:text-slate-100">{formatCurrency(getSubtotal())}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Tax (8%)</span>
+                  <span>{t.tax} (8%)</span>
                   <span>{formatCurrency(getTax())}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Shipping</span>
+                  <span>{t.shipping}</span>
                   <span>{formatCurrency(getShippingFee())}</span>
                 </div>
                 {getDiscountTotal() > 0 && (
                   <div className="flex justify-between text-emerald-600 font-bold">
-                    <span>Discount ({couponCode})</span>
+                    <span>{t.discountCoupon} ({couponCode})</span>
                     <span>-{formatCurrency(getDiscountTotal())}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-base font-black text-slate-900 dark:text-slate-50 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <span>Total Due</span>
+                  <span>{t.grandTotal}</span>
                   <span className="text-amber-600 dark:text-amber-400">{formatCurrency(getGrandTotal())}</span>
                 </div>
               </div>
 
               <div className="pt-2 text-[11px] text-slate-500 flex items-center gap-1.5 justify-center">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" /> Insured Direct WhatsApp Dispatch
+                <ShieldCheck className="w-4 h-4 text-emerald-500" /> {t.directWhatsAppDispatch}
               </div>
             </Card>
           </div>
@@ -399,4 +428,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-

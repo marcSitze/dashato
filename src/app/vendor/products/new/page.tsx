@@ -33,14 +33,14 @@ export default async function VendorCreateProductPage() {
       <div className="flex items-center justify-between">
         <div>
           <Link href="/vendor" className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 mb-2">
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Vendor Seller Center
+            <ArrowLeft className="w-3.5 h-3.5" /> Retour au Centre Vendeur
           </Link>
           <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
             <Store className="w-8 h-8 text-amber-500" />
-            Add Store Product
+            Ajouter un Produit à la Boutique
           </h1>
           <p className="text-sm text-slate-500">
-            Add a new product listing to your store catalog with media uploads, pricing, and category selection.
+            Ajoutez un nouvel article à votre boutique avec photos/vidéos, tarification et classification.
           </p>
         </div>
       </div>

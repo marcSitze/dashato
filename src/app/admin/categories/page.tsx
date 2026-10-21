@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { FolderTree, Plus, ChevronRight, Sparkles } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
@@ -16,17 +16,17 @@ export default async function AdminCategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            Nested Categories & SEO Structure
+            Hiérarchie des Catégories & Structure SEO
           </h1>
-          <p className="text-sm text-slate-500">Manage multi-level department hierarchy and catalog organization</p>
+          <p className="text-sm text-slate-500">Gérer les départements et l’arborescence du catalogue</p>
         </div>
 
         <Link href="/admin/categories/new">
-          <Button className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs px-4">
-            <Plus className="w-4 h-4 mr-1.5" /> Create Category
+          <Button className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs px-4 w-full sm:w-auto shadow-sm">
+            <Plus className="w-4 h-4 mr-1.5" /> Créer une Catégorie
           </Button>
         </Link>
       </div>
@@ -41,7 +41,7 @@ export default async function AdminCategoriesPage() {
                 className="w-full h-full object-cover"
               />
               <div className="absolute top-3 left-3">
-                {cat.isFeatured && <Badge variant="default" className="font-bold text-[10px] bg-amber-500 text-slate-950">Featured</Badge>}
+                {cat.isFeatured && <Badge variant="default" className="font-bold text-[10px] bg-amber-500 text-slate-950">En Vedette</Badge>}
               </div>
             </div>
 
@@ -54,10 +54,10 @@ export default async function AdminCategoriesPage() {
             </div>
 
             <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100 dark:border-slate-800">
-              <span className="font-bold text-amber-600 dark:text-amber-400">{cat._count.products} Products</span>
+              <span className="font-bold text-amber-600 dark:text-amber-400">{cat._count.products} Produits</span>
               <Link href={`/admin/categories/${cat.id}/edit`}>
                 <Button size="sm" variant="outline" className="h-7 text-xs font-bold text-amber-600 border-amber-500/30 hover:bg-amber-500/10">
-                  Edit Category
+                  Modifier
                 </Button>
               </Link>
             </div>
@@ -67,3 +67,4 @@ export default async function AdminCategoriesPage() {
     </div>
   );
 }
+

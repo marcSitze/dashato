@@ -65,9 +65,9 @@ export default async function VendorInventoryPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-          Store Stock Inventory Control
+          Contrôle des Stocks de la Boutique
         </h1>
-        <p className="text-sm text-slate-500">Monitor stock levels, restock items, and audit inventory movements for your store</p>
+        <p className="text-sm text-slate-500">Surveillez les niveaux de stock, réapprovisionnez vos articles et auditez les mouvements d’inventaire pour votre boutique</p>
       </div>
 
       <InventoryManagerClient initialInventories={inventories} />

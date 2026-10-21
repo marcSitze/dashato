@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShieldCheck, Truck, RotateCcw, Headphones, Sparkles, CreditCard } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, Headphones, CreditCard } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { LanguageToggle } from '@/components/language-toggle';
 import { useTranslation } from '@/lib/i18n/context';
@@ -20,7 +20,7 @@ export function Footer() {
             </div>
             <div>
               <h5 className="font-bold text-secondary-foreground text-sm">{t.trustShipping}</h5>
-              <p className="text-xs text-secondary-foreground/60">On all orders over $150</p>
+              <p className="text-xs text-secondary-foreground/60">{t.trustShippingSubtitle}</p>
             </div>
           </div>
 
@@ -30,7 +30,7 @@ export function Footer() {
             </div>
             <div>
               <h5 className="font-bold text-secondary-foreground text-sm">{t.trustGuarantee}</h5>
-              <p className="text-xs text-secondary-foreground/60">PCI-DSS 256-bit encryption</p>
+              <p className="text-xs text-secondary-foreground/60">{t.trustGuaranteeSubtitle}</p>
             </div>
           </div>
 
@@ -39,8 +39,8 @@ export function Footer() {
               <RotateCcw className="w-6 h-6" />
             </div>
             <div>
-              <h5 className="font-bold text-secondary-foreground text-sm">30-Day Easy Returns</h5>
-              <p className="text-xs text-secondary-foreground/60">Money back guarantee</p>
+              <h5 className="font-bold text-secondary-foreground text-sm">{t.trustReturns}</h5>
+              <p className="text-xs text-secondary-foreground/60">{t.trustReturnsSubtitle}</p>
             </div>
           </div>
 
@@ -50,7 +50,7 @@ export function Footer() {
             </div>
             <div>
               <h5 className="font-bold text-secondary-foreground text-sm">{t.trustSupport}</h5>
-              <p className="text-xs text-secondary-foreground/60">Multi-vendor customer care</p>
+              <p className="text-xs text-secondary-foreground/60">{t.trustSupportSubtitle}</p>
             </div>
           </div>
         </div>
@@ -72,7 +72,7 @@ export function Footer() {
               />
             </div>
             <p className="text-xs text-secondary-foreground/75 leading-relaxed max-w-sm">
-              Dashato is the premiere global multi-vendor marketplace uniting premium electronics, high-end workstations, audiophile sound gear, and Scandinavian home living.
+              {t.brandStory}
             </p>
             
             {/* Quick Preference Controls */}
@@ -84,13 +84,12 @@ export function Footer() {
 
           {/* Shop Departments */}
           <div className="space-y-3">
-            <h6 className="font-bold text-secondary-foreground text-xs uppercase tracking-wider">Departments</h6>
+            <h6 className="font-bold text-secondary-foreground text-xs uppercase tracking-wider">{t.departments}</h6>
             <ul className="space-y-2 text-xs text-secondary-foreground/80">
-              <li><Link href="/products?category=laptops-computers" className="hover:text-primary transition-colors">Laptops & Workstations</Link></li>
-              <li><Link href="/products?category=audio-headphones" className="hover:text-primary transition-colors">Audio & Studio Gear</Link></li>
-              <li><Link href="/products?category=smart-home-wearables" className="hover:text-primary transition-colors">Smart Home & Wearables</Link></li>
-              <li><Link href="/products?category=home-office" className="hover:text-primary transition-colors">Scandinavian Home & Furniture</Link></li>
-              <li><Link href="/products" className="hover:text-primary transition-colors">All Marketplace Products</Link></li>
+              <li><Link href="/products" className="hover:text-primary transition-colors">{t.allProducts}</Link></li>
+              <li><Link href="/products?sort=best_selling" className="hover:text-primary transition-colors">{t.bestSellers}</Link></li>
+              <li><Link href="/products?sort=newest" className="hover:text-primary transition-colors">{t.newArrivals}</Link></li>
+              <li><Link href="/deals" className="hover:text-primary transition-colors">{t.flashDeals}</Link></li>
             </ul>
           </div>
 
@@ -99,7 +98,7 @@ export function Footer() {
             <h6 className="font-bold text-secondary-foreground text-xs uppercase tracking-wider">{t.customerCare}</h6>
             <ul className="space-y-2 text-xs text-secondary-foreground/80">
               <li><Link href="/account" className="hover:text-primary transition-colors">{t.myAccount}</Link></li>
-              <li><Link href="/account/orders" className="hover:text-primary transition-colors">Track Order Status</Link></li>
+              <li><Link href="/account/orders" className="hover:text-primary transition-colors">{t.trackOrderStatus}</Link></li>
               <li><Link href="/account/wishlist" className="hover:text-primary transition-colors">{t.wishlist}</Link></li>
               <li><Link href="/checkout" className="hover:text-primary transition-colors">{t.proceedToCheckout}</Link></li>
             </ul>
@@ -107,7 +106,7 @@ export function Footer() {
 
           {/* Marketplace Vendors & Admin */}
           <div className="space-y-3">
-            <h6 className="font-bold text-secondary-foreground text-xs uppercase tracking-wider">Marketplace & Portals</h6>
+            <h6 className="font-bold text-secondary-foreground text-xs uppercase tracking-wider">{t.portals}</h6>
             <ul className="space-y-2 text-xs text-secondary-foreground/80">
               <li><Link href="/vendor/apply" className="text-primary font-semibold hover:underline">{t.applyVendor}</Link></li>
               <li><Link href="/vendor" className="hover:text-primary transition-colors">{t.vendorCenter}</Link></li>
@@ -119,12 +118,12 @@ export function Footer() {
 
         {/* Sub-footer Copyright & Payment badges */}
         <div className="border-t border-secondary-foreground/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-secondary-foreground/60">
-          <p>© {new Date().getFullYear()} Dashato Inc. {t.rights} Built with Next.js App Router, Prisma, & Tailwind CSS.</p>
+          <p>© {new Date().getFullYear()} Dashato Inc. {t.rights}</p>
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1"><CreditCard className="w-4 h-4 text-secondary-foreground/70" /> Visa</span>
             <span>Mastercard</span>
             <span>Amex</span>
-            <span>Stripe</span>
+            <span>WhatsApp Direct</span>
             <span>Apple Pay</span>
           </div>
         </div>

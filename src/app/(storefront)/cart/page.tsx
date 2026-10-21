@@ -3,7 +3,6 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { db } from '@/lib/db';
 import { AnnouncementBar } from '@/components/storefront/announcement-bar';
 import { Header } from '@/components/storefront/header';
 import { Footer } from '@/components/storefront/footer';
@@ -18,7 +17,6 @@ import {
   Minus,
   ArrowRight,
   ShieldCheck,
-  Truck,
   Store,
   Tag,
   Heart,
@@ -70,9 +68,9 @@ export default function CartPage() {
 
     if (couponInput.toUpperCase() === 'DASHATO10') {
       applyCoupon('DASHATO10', 10);
-      toast.success('Coupon DASHATO10 applied! 10% Discount applied to your cart.');
+      toast.success(t.couponApplied);
     } else {
-      toast.error('Invalid coupon code. Try DASHATO10.');
+      toast.error(t.invalidCoupon);
     }
   };
 
@@ -87,7 +85,7 @@ export default function CartPage() {
       inStock: true,
     });
     removeItem(item.id);
-    toast.success(`Saved "${item.title.substring(0, 20)}..." for later in wishlist.`);
+    toast.success(t.savedForLaterToast);
   };
 
   return (
@@ -123,13 +121,13 @@ export default function CartPage() {
               {Object.entries(groupedItems).map(([vendorId, group]: [string, any]) => (
                 <div
                   key={vendorId}
-                  className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-4"
+                  className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-sm space-y-4 max-w-full"
                 >
                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                     <div className="flex items-center gap-2">
                       <Store className="w-5 h-5 text-amber-500" />
                       <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">
-                        Fulfilled by {group.vendorName}
+                        {t.fulfilledBy} {group.vendorName}
                       </span>
                     </div>
                     <span className="text-xs text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded">
@@ -140,14 +138,14 @@ export default function CartPage() {
                   <div className="divide-y divide-slate-100 dark:divide-slate-800">
                     {group.items.map((item: any) => (
                       <div key={item.id} className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 flex-1 min-w-0">
                           <img
                             src={item.image}
                             alt={item.title}
                             className="w-20 h-20 rounded-2xl object-cover border border-slate-200 dark:border-slate-800 flex-shrink-0"
                           />
-                          <div className="space-y-1">
-                            <Link href={`/products/${item.slug}`} className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-amber-500 line-clamp-1">
+                          <div className="space-y-1 flex-1 min-w-0">
+                            <Link href={`/products/${item.slug}`} className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-amber-500 line-clamp-1 block truncate">
                               {item.title}
                             </Link>
                             {item.variantTitle && (
@@ -159,7 +157,7 @@ export default function CartPage() {
                               onClick={() => handleSaveForLater(item)}
                               className="text-xs font-semibold text-amber-600 hover:underline flex items-center gap-1 pt-1"
                             >
-                              <Heart className="w-3.5 h-3.5" /> Save for Later
+                              <Heart className="w-3.5 h-3.5" /> {t.saveForLater}
                             </button>
                           </div>
                         </div>
@@ -170,6 +168,7 @@ export default function CartPage() {
                             <button
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
                               className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                              aria-label="Decrease quantity"
                             >
                               <Minus className="w-3.5 h-3.5" />
                             </button>
@@ -177,6 +176,7 @@ export default function CartPage() {
                             <button
                               onClick={() => updateQuantity(item.id, item.quantity + 1)}
                               className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                              aria-label="Increase quantity"
                             >
                               <Plus className="w-3.5 h-3.5" />
                             </button>
@@ -187,13 +187,14 @@ export default function CartPage() {
                               {formatCurrency(item.price * item.quantity)}
                             </div>
                             <div className="text-[11px] text-slate-400">
-                              {formatCurrency(item.price)} each
+                              {formatCurrency(item.price)}
                             </div>
                           </div>
 
                           <button
                             onClick={() => removeItem(item.id)}
                             className="text-slate-400 hover:text-rose-500 p-2 transition-colors"
+                            aria-label="Remove item"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -206,7 +207,7 @@ export default function CartPage() {
 
               <div className="flex justify-between items-center pt-2">
                 <Button onClick={clearCart} variant="ghost" className="text-xs text-rose-600 hover:text-rose-700">
-                  Clear Entire Cart
+                  {t.clearAll}
                 </Button>
                 <Link href="/products">
                   <Button variant="outline" className="text-xs font-semibold rounded-xl">
@@ -221,12 +222,12 @@ export default function CartPage() {
               {/* Coupon Box */}
               <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
                 <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-amber-500" /> Coupon & Promo Code
+                  <Tag className="w-4 h-4 text-amber-500" /> {t.discountCoupon}
                 </h3>
                 {couponCode ? (
                   <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold">
-                    <span>Applied: {couponCode} ({discountPercentage}% OFF)</span>
-                    <button onClick={removeCoupon} className="text-rose-600 hover:underline">Remove</button>
+                    <span>{t.couponApplied}: {couponCode} ({discountPercentage}%)</span>
+                    <button onClick={removeCoupon} className="text-rose-600 hover:underline">{t.delete}</button>
                   </div>
                 ) : (
                   <form onSubmit={handleApplyCoupon} className="flex gap-2">
@@ -237,7 +238,7 @@ export default function CartPage() {
                       onChange={(e) => setCouponInput(e.target.value)}
                       className="text-xs rounded-xl uppercase"
                     />
-                    <Button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold px-4">
+                    <Button type="submit" className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-950 rounded-xl text-xs font-bold px-4">
                       {t.applyCoupon}
                     </Button>
                   </form>
@@ -258,7 +259,7 @@ export default function CartPage() {
 
                   {discountPercentage > 0 && (
                     <div className="flex justify-between text-emerald-600 font-semibold">
-                      <span>{t.discount} ({discountPercentage}%)</span>
+                      <span>{t.discountCoupon} ({discountPercentage}%)</span>
                       <span>-{formatCurrency(getDiscountTotal())}</span>
                     </div>
                   )}
@@ -289,7 +290,7 @@ export default function CartPage() {
 
                 <div className="flex items-center justify-center gap-2 text-xs text-slate-500 text-center pt-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                  <span>{t.encryptedCheckout}</span>
+                  <span>{t.directWhatsAppDispatch}</span>
                 </div>
               </div>
             </div>

@@ -30,16 +30,16 @@ export default async function VendorCategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            Marketplace Categories Catalog
+            Catalogue des Catégories Marketplace
           </h1>
-          <p className="text-sm text-slate-500">Browse categories or add a new category to group your store products</p>
+          <p className="text-sm text-slate-500">Parcourez les rayons et départements disponibles pour vos articles de boutique</p>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm max-w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {categories.map((cat: any) => (
             <div
@@ -58,9 +58,9 @@ export default async function VendorCategoriesPage() {
                 )}
                 <div className="text-[10px] font-bold text-slate-500 pt-2 flex items-center gap-2">
                   <span className="flex items-center gap-1">
-                    <Package className="w-3 h-3 text-amber-500" /> {cat._count?.products || 0} products
+                    <Package className="w-3 h-3 text-amber-500" /> {cat._count?.products || 0} produits
                   </span>
-                  {cat.parent && <span>• Subcategory of {cat.parent.name}</span>}
+                  {cat.parent && <span>• Sous-catégorie de {cat.parent.name}</span>}
                 </div>
               </div>
               <Badge variant="outline" className="text-[10px] font-mono border-slate-300 dark:border-slate-700">

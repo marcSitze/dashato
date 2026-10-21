@@ -1,5 +1,4 @@
 import { db } from '@/lib/db';
-import { Users, Shield, CheckCircle2, UserX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/utils';
@@ -17,22 +16,22 @@ export default async function AdminUsersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            User Directory & Access Control (RBAC)
+            Répertoire des Utilisateurs & Contrôle des Accès (RBAC)
           </h1>
-          <p className="text-sm text-slate-500">Manage user accounts, assign roles (Customer, Vendor, Admin), and suspend access</p>
+          <p className="text-sm text-slate-500">Gérer les comptes utilisateurs, attribuer les rôles (Client, Vendeur, Admin) et contrôler les accès</p>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm max-w-full">
+        <div className="overflow-x-auto smooth-scroll-x rounded-2xl w-full">
+          <table className="w-full min-w-[650px] text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase font-bold text-[10px]">
-                <th className="py-3 px-4">User</th>
-                <th className="py-3 px-4">Role</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Orders</th>
-                <th className="py-3 px-4">Joined Date</th>
+                <th className="py-3 px-4">Utilisateur</th>
+                <th className="py-3 px-4">Rôle</th>
+                <th className="py-3 px-4">Statut</th>
+                <th className="py-3 px-4">Commandes</th>
+                <th className="py-3 px-4">Date d’inscription</th>
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -54,19 +53,19 @@ export default async function AdminUsersPage() {
                   </td>
                   <td className="py-3.5 px-4">
                     <Badge variant={u.role === 'ADMIN' ? 'destructive' : u.role === 'VENDOR' ? 'default' : 'secondary'} className="uppercase font-bold text-[10px]">
-                      {u.role}
+                      {u.role === 'CUSTOMER' ? 'CLIENT' : u.role === 'VENDOR' ? 'VENDEUR' : u.role}
                     </Badge>
                   </td>
                   <td className="py-3.5 px-4">
                     <Badge variant={u.status === 'ACTIVE' ? 'success' : 'destructive'} className="uppercase font-bold text-[10px]">
-                      {u.status}
+                      {u.status === 'ACTIVE' ? 'ACTIF' : u.status === 'SUSPENDED' ? 'SUSPENDU' : u.status}
                     </Badge>
                   </td>
                   <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-slate-100">{u._count.orders}</td>
                   <td className="py-3.5 px-4 text-slate-500">{formatDate(u.createdAt)}</td>
                   <td className="py-3.5 px-4 text-right space-x-1">
-                    <Button size="sm" variant="ghost" className="h-7 text-xs font-bold text-slate-600">
-                      Manage Role
+                    <Button size="sm" variant="ghost" className="h-7 text-xs font-bold text-amber-600 hover:bg-amber-500/10">
+                      Gérer le Rôle
                     </Button>
                   </td>
                 </tr>
@@ -78,3 +77,4 @@ export default async function AdminUsersPage() {
     </div>
   );
 }
+

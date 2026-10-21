@@ -6,27 +6,36 @@ import { Locale, dictionaries } from './dictionaries';
 interface LanguageContextType {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: typeof dictionaries['en'];
+  t: typeof dictionaries['fr'];
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('en');
+  // Default to French as requested
+  const [locale, setLocaleState] = useState<Locale>('fr');
 
   useEffect(() => {
-    const savedLocale = localStorage.getItem('dashato-locale') as Locale;
-    if (savedLocale && (savedLocale === 'en' || savedLocale === 'fr')) {
-      setLocaleState(savedLocale);
+    try {
+      const savedLocale = localStorage.getItem('dashato-locale') as Locale;
+      if (savedLocale === 'en' || savedLocale === 'fr') {
+        setLocaleState(savedLocale);
+      }
+    } catch {
+      // Ignore localStorage restrictions
     }
   }, []);
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
-    localStorage.setItem('dashato-locale', newLocale);
+    try {
+      localStorage.setItem('dashato-locale', newLocale);
+    } catch {
+      // Ignore
+    }
   };
 
-  const t = dictionaries[locale] || dictionaries.en;
+  const t = dictionaries[locale] || dictionaries.fr;
 
   return (
     <LanguageContext.Provider value={{ locale, setLocale, t }}>

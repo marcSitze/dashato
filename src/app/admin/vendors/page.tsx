@@ -1,8 +1,7 @@
 import { db } from '@/lib/db';
-import { Store, CheckCircle2, AlertCircle, Percent, Plus } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency } from '@/lib/utils';
 
 export default async function AdminVendorsPage() {
   const vendors = await db.vendor.findMany({
@@ -19,9 +18,9 @@ export default async function AdminVendorsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            Vendor Marketplace Applications & Fee Control
+            Candidatures Vendeurs & Gestion des Commissions
           </h1>
-          <p className="text-sm text-slate-500">Approve seller stores, configure platform commission rates, and track store performance</p>
+          <p className="text-sm text-slate-500">Approuver les boutiques vendeuses, configurer les taux de commission et suivre les performances</p>
         </div>
       </div>
 
@@ -42,27 +41,27 @@ export default async function AdminVendorsPage() {
                 <p className="text-xs text-slate-400">{v.user.name} ({v.user.email})</p>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant={v.isApproved ? 'success' : 'warning'} className="uppercase font-bold text-[10px]">
-                    {v.status}
+                    {v.isApproved ? 'APPROUVÉ' : v.status === 'PENDING' ? 'EN ATTENTE' : v.status}
                   </Badge>
-                  <span className="text-xs font-bold text-amber-600">{(v.commissionRate * 100).toFixed(0)}% Fee</span>
+                  <span className="text-xs font-bold text-amber-600">{(v.commissionRate * 100).toFixed(0)}% Commission</span>
                 </div>
               </div>
             </div>
 
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs space-y-1">
               <div className="flex justify-between">
-                <span className="text-slate-500">Legal Tax ID:</span>
+                <span className="text-slate-500">Identifiant Fiscal :</span>
                 <span className="font-mono font-bold text-slate-900 dark:text-slate-100">{v.taxId || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Products Listed:</span>
+                <span className="text-slate-500">Produits Listés :</span>
                 <span className="font-bold text-slate-900 dark:text-slate-100">{v._count.products}</span>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <Button size="sm" variant="outline" className="flex-1 text-xs font-bold rounded-xl">
-                Configure Commission
+                Configurer la Commission
               </Button>
             </div>
           </div>
@@ -71,3 +70,4 @@ export default async function AdminVendorsPage() {
     </div>
   );
 }
+

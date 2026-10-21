@@ -55,35 +55,33 @@ export default async function VendorProductsPage({ searchParams }: VendorProduct
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center justify-between w-full">
-          <div>
-            <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-              My Store Products Catalog
-            </h1>
-            <p className="text-sm text-slate-500">Manage your store product listings, prices, and stock inventory</p>
-          </div>
-          <Link href="/vendor/products/new">
-            <Button className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs px-4 shadow-sm">
-              <Plus className="w-4 h-4 mr-1.5" /> Add New Product
-            </Button>
-          </Link>
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+            Catalogue des Produits de la Boutique
+          </h1>
+          <p className="text-sm text-slate-500">Gérez vos listes de produits, vos prix et vos niveaux de stock</p>
         </div>
+        <Link href="/vendor/products/new">
+          <Button className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs px-4 shadow-sm w-full sm:w-auto">
+            <Plus className="w-4 h-4 mr-1.5" /> Ajouter un Produit
+          </Button>
+        </Link>
       </div>
 
       {/* Filter Tabs */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4 shadow-sm">
-        <div className="flex items-center gap-2 overflow-x-auto text-xs">
+        <div className="flex items-center gap-2 overflow-x-auto smooth-scroll-x text-xs w-full sm:w-auto">
           {[
-            { label: 'All Products', value: '' },
-            { label: 'Active', value: 'ACTIVE' },
-            { label: 'Pending Approval', value: 'PENDING_APPROVAL' },
-            { label: 'Draft', value: 'DRAFT' },
-            { label: 'Archived', value: 'ARCHIVED' },
+            { label: 'Tous les Produits', value: '' },
+            { label: 'Actif', value: 'ACTIVE' },
+            { label: 'En Attente', value: 'PENDING_APPROVAL' },
+            { label: 'Brouillon', value: 'DRAFT' },
+            { label: 'Archivé', value: 'ARCHIVED' },
           ].map((tab) => (
             <Link
               key={tab.value}
               href={`/vendor/products${tab.value ? `?status=${tab.value}` : ''}`}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
                 (status || '') === tab.value
                   ? 'bg-amber-500 text-slate-950 shadow-sm'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
@@ -96,16 +94,16 @@ export default async function VendorProductsPage({ searchParams }: VendorProduct
       </div>
 
       {/* Data Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm max-w-full">
+        <div className="overflow-x-auto smooth-scroll-x rounded-2xl w-full">
+          <table className="w-full min-w-[700px] text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase font-bold text-[10px]">
-                <th className="py-3 px-4">Product Details</th>
+                <th className="py-3 px-4">Détails du Produit</th>
                 <th className="py-3 px-4">SKU</th>
-                <th className="py-3 px-4">Price</th>
+                <th className="py-3 px-4">Prix</th>
                 <th className="py-3 px-4">Stock</th>
-                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Statut</th>
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -113,7 +111,7 @@ export default async function VendorProductsPage({ searchParams }: VendorProduct
               {products.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-400">
-                    No products found in your store catalog.
+                    Aucun produit trouvé dans le catalogue de votre boutique.
                   </td>
                 </tr>
               ) : (
@@ -130,7 +128,7 @@ export default async function VendorProductsPage({ searchParams }: VendorProduct
                           <Link href={`/products/${p.slug}`} target="_blank" className="font-bold text-slate-900 dark:text-slate-100 hover:text-amber-500 line-clamp-1">
                             {p.title}
                           </Link>
-                          <span className="text-[10px] text-slate-400">{p.brand?.name || 'Generic'}</span>
+                          <span className="text-[10px] text-slate-400">{p.brand?.name || 'Générique'}</span>
                         </div>
                       </div>
                     </td>
@@ -138,18 +136,18 @@ export default async function VendorProductsPage({ searchParams }: VendorProduct
                     <td className="py-3.5 px-4 font-extrabold text-slate-900 dark:text-slate-100">{formatCurrency(p.price)}</td>
                     <td className="py-3.5 px-4">
                       <Badge variant={(p.inventory?.quantity ?? 0) > 5 ? 'success' : 'destructive'}>
-                        {p.inventory?.quantity ?? 0} in stock
+                        {p.inventory?.quantity ?? 0} en stock
                       </Badge>
                     </td>
                     <td className="py-3.5 px-4">
                       <Badge variant={p.status === 'ACTIVE' ? 'success' : 'warning'} className="uppercase font-bold text-[10px]">
-                        {p.status}
+                        {p.status === 'ACTIVE' ? 'ACTIF' : p.status === 'PENDING_APPROVAL' ? 'EN ATTENTE' : p.status === 'DRAFT' ? 'BROUILLON' : p.status}
                       </Badge>
                     </td>
                     <td className="py-3.5 px-4 text-right space-x-1">
                       <Link href={`/vendor/products/${p.id}/edit`}>
                         <Button size="sm" variant="outline" className="h-7 text-xs text-amber-600 font-bold border-amber-500/30 hover:bg-amber-500/10">
-                          Edit
+                          Modifier
                         </Button>
                       </Link>
                     </td>

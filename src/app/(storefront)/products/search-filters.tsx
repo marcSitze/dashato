@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n/context';
 import { SlidersHorizontal, Star, Check, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,6 +37,7 @@ export function SearchFilters({
 }: SearchFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
 
   const [minPrice, setMinPrice] = React.useState(currentMinPrice?.toString() || '');
   const [maxPrice, setMaxPrice] = React.useState(currentMaxPrice?.toString() || '');
@@ -66,7 +68,7 @@ export function SearchFilters({
     <div className="space-y-6">
       {/* Category Filter */}
       <div className="space-y-2">
-        <h4 className="text-xs font-extrabold uppercase text-muted-foreground tracking-wider">Categories</h4>
+        <h4 className="text-xs font-extrabold uppercase text-muted-foreground tracking-wider">{t.allCategories}</h4>
         <div className="space-y-1 text-sm">
           <button
             onClick={() => applyFilter('category', '')}
@@ -76,7 +78,7 @@ export function SearchFilters({
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            All Departments
+            {t.allDepartments}
           </button>
           {categories.map((cat) => (
             <button
@@ -97,7 +99,7 @@ export function SearchFilters({
 
       {/* Price Range Filter */}
       <div className="space-y-3 pt-4 border-t border-border">
-        <h4 className="text-xs font-extrabold uppercase text-muted-foreground tracking-wider">Price Range ($USD)</h4>
+        <h4 className="text-xs font-extrabold uppercase text-muted-foreground tracking-wider">{t.priceRange}</h4>
         <form onSubmit={handlePriceApply} className="flex items-center gap-2">
           <Input
             type="number"
@@ -115,14 +117,14 @@ export function SearchFilters({
             className="h-9 text-xs rounded-xl border-border bg-card text-foreground"
           />
           <Button type="submit" size="sm" className="h-9 bg-primary hover:bg-primary-hover text-primary-foreground rounded-xl text-xs px-3">
-            Go
+            OK
           </Button>
         </form>
       </div>
 
       {/* Brand Filter */}
       <div className="space-y-2 pt-4 border-t border-border">
-        <h4 className="text-xs font-extrabold uppercase text-muted-foreground tracking-wider">Brand</h4>
+        <h4 className="text-xs font-extrabold uppercase text-muted-foreground tracking-wider">{t.brand}</h4>
         <div className="space-y-1 text-sm">
           {brands.map((b) => (
             <button
@@ -143,7 +145,7 @@ export function SearchFilters({
 
       {/* Rating Filter */}
       <div className="space-y-2 pt-4 border-t border-border">
-        <h4 className="text-xs font-extrabold uppercase text-muted-foreground tracking-wider">Minimum Rating</h4>
+        <h4 className="text-xs font-extrabold uppercase text-muted-foreground tracking-wider">{t.customerRating}</h4>
         <div className="space-y-1">
           {[4, 3, 2].map((r) => (
             <button
@@ -159,11 +161,32 @@ export function SearchFilters({
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-3.5 h-3.5 ${i < r ? 'fill-primary text-primary' : 'text-muted-foreground/30'}`}
+                    className={`w-3.5 h-3.5 ${i < r ? 'fill-primary' : 'text-muted-foreground/30'}`}
                   />
                 ))}
               </div>
-              <span>& Up</span>
+              <span>{t.higher}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Verified Vendors */}
+      <div className="space-y-2 pt-4 border-t border-border">
+        <h4 className="text-xs font-extrabold uppercase text-muted-foreground tracking-wider">{t.seller}</h4>
+        <div className="space-y-1 text-sm">
+          {vendors.map((v) => (
+            <button
+              key={v.id}
+              onClick={() => applyFilter('vendor', currentVendor === v.id ? '' : v.id)}
+              className={`w-full text-left px-2.5 py-1.5 rounded-xl font-medium transition-colors flex items-center justify-between ${
+                currentVendor === v.id
+                  ? 'bg-primary/10 text-primary font-bold'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <span className="truncate">{v.store?.name || v.businessName}</span>
+              {currentVendor === v.id && <Check className="w-3.5 h-3.5 text-primary" />}
             </button>
           ))}
         </div>
@@ -173,38 +196,41 @@ export function SearchFilters({
 
   return (
     <>
-      {/* Mobile Filter Drawer Button */}
+      {/* Desktop Sidebar Filter Panel */}
+      <div className="hidden lg:block bg-card rounded-2xl p-6 border border-border shadow-sm">
+        <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
+          <div className="flex items-center gap-2 font-bold text-foreground">
+            <SlidersHorizontal className="w-4 h-4 text-primary" />
+            <span>{t.filter}</span>
+          </div>
+          {(currentCategory || currentBrand || currentMinPrice || currentMaxPrice || currentRating || currentVendor) && (
+            <button
+              onClick={() => router.push('/products')}
+              className="text-xs font-semibold text-rose-500 hover:underline"
+            >
+              {t.clearAll}
+            </button>
+          )}
+        </div>
+        <FilterControls />
+      </div>
+
+      {/* Mobile Drawer Filter Trigger */}
       <div className="lg:hidden mb-4">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" className="w-full flex items-center justify-between rounded-2xl border-border bg-card text-foreground font-bold">
-              <span className="flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4 text-primary" /> Filter & Sort Discovery
-              </span>
-              <Filter className="w-4 h-4 text-muted-foreground" />
+            <Button variant="outline" className="w-full rounded-xl border-border flex items-center justify-center gap-2">
+              <Filter className="w-4 h-4" />
+              <span>{t.filter}</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-80 overflow-y-auto bg-card text-card-foreground border-r border-border">
-            <SheetHeader className="pb-4 border-b border-border">
-              <SheetTitle className="flex items-center gap-2 font-bold text-card-foreground">
-                <SlidersHorizontal className="w-4 h-4 text-primary" /> Filter Products
-              </SheetTitle>
+          <SheetContent side="left" className="w-80 overflow-y-auto">
+            <SheetHeader className="mb-4">
+              <SheetTitle>{t.filter}</SheetTitle>
             </SheetHeader>
-            <div className="py-6">
-              <FilterControls />
-            </div>
+            <FilterControls />
           </SheetContent>
         </Sheet>
-      </div>
-
-      {/* Desktop Sticky Sidebar */}
-      <div className="hidden lg:block bg-card rounded-3xl p-6 border border-border space-y-6 shadow-sm sticky top-24">
-        <div className="flex items-center justify-between border-b border-border pb-4">
-          <h3 className="font-bold text-card-foreground flex items-center gap-2">
-            <SlidersHorizontal className="w-4 h-4 text-primary" /> Filter Discovery
-          </h3>
-        </div>
-        <FilterControls />
       </div>
     </>
   );

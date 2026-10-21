@@ -22,8 +22,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sora.variable} ${sora.className} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
+    <html lang="fr" className={`${sora.variable} ${sora.className} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-background text-foreground font-sans overflow-x-clip w-full max-w-full">
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -89,7 +89,7 @@ export function Header({ categories = [] }: { categories?: CategoryItem[] }) {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+    <header className="sticky top-0 z-40 sticky-header bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm w-full">
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           {/* Mobile Navigation Trigger & Brand Logo */}
@@ -243,7 +243,7 @@ export function Header({ categories = [] }: { categories?: CategoryItem[] }) {
                       onClick={() => setMobileMenuOpen(false)}
                       className="flex items-center justify-between py-2 px-3 rounded-lg font-semibold text-sm text-foreground hover:bg-muted transition-colors"
                     >
-                      <span>All Products</span>
+                      <span>{t.allProducts}</span>
                       <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
                     </Link>
                     <Link
@@ -260,7 +260,7 @@ export function Header({ categories = [] }: { categories?: CategoryItem[] }) {
 
                   <div className="border-t border-border pt-3">
                     <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-3">
-                      Shop by Category
+                      {t.shopByCategory}
                     </p>
                     <div className="space-y-0.5">
                       {categories.map((cat) => (
@@ -279,7 +279,7 @@ export function Header({ categories = [] }: { categories?: CategoryItem[] }) {
 
                 {/* Quick Controls Footer: Theme & Language */}
                 <div className="p-4 border-t border-border bg-muted/30 flex items-center justify-between gap-3">
-                  <span className="text-xs font-semibold text-muted-foreground">Settings</span>
+                  <span className="text-xs font-semibold text-muted-foreground">{t.settings}</span>
                   <div className="flex items-center gap-2">
                     <LanguageToggle />
                     <ThemeToggle />
@@ -292,12 +292,12 @@ export function Header({ categories = [] }: { categories?: CategoryItem[] }) {
               <img
                 src="/Dashato_logo_light_mode.png"
                 alt="Dashato"
-                className="h-9 w-auto dark:hidden object-contain group-hover:scale-105 transition-transform"
+                className="h-7 sm:h-9 w-auto dark:hidden object-contain group-hover:scale-105 transition-transform"
               />
               <img
                 src="/Dashato_logo_dark_mode.png"
                 alt="Dashato"
-                className="h-9 w-auto hidden dark:block object-contain group-hover:scale-105 transition-transform"
+                className="h-7 sm:h-9 w-auto hidden dark:block object-contain group-hover:scale-105 transition-transform"
               />
             </Link>
           </div>
@@ -381,7 +381,7 @@ export function Header({ categories = [] }: { categories?: CategoryItem[] }) {
                         <span className="font-bold text-foreground">{session.user.name}</span>
                         <span className="text-xs font-normal text-muted-foreground">{session.user.email}</span>
                         <span className="mt-1 inline-block text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded w-fit uppercase">
-                          Role: {session.user.role}
+                          {t.roleLabel}: {session.user.role}
                         </span>
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
@@ -487,8 +487,8 @@ export function Header({ categories = [] }: { categories?: CategoryItem[] }) {
 
       {/* Secondary Category Navigation Bar */}
       <nav className="hidden lg:block bg-muted/60 border-t border-border py-2.5 px-4 text-xs">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-6 font-medium text-foreground">
+        <div className="max-w-7xl mx-auto flex items-center justify-between overflow-x-auto smooth-scroll-x no-scrollbar gap-4">
+          <div className="flex items-center gap-6 font-medium text-foreground flex-shrink-0">
             <Link href="/products" className="flex items-center gap-1.5 text-primary font-bold hover:underline">
               <SlidersHorizontal className="w-3.5 h-3.5" /> {t.allCategories}
             </Link>

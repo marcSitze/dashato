@@ -18,13 +18,11 @@ import {
   Boxes,
   AlertTriangle,
   ArrowUpRight,
-  ArrowDownRight,
   RefreshCw,
   Search,
   History,
   Plus,
   Minus,
-  CheckCircle2,
   PackageX,
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
@@ -97,10 +95,10 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to adjust stock');
+        throw new Error(data.error || 'Erreur lors de la mise à jour du stock');
       }
 
-      toast.success('Stock inventory updated successfully!');
+      toast.success('Inventaire de stock mis à jour avec succès !');
 
       // Update local state item
       setInventories((prev) =>
@@ -109,7 +107,7 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
 
       setSelectedInv(null);
     } catch (err: any) {
-      toast.error(err.message || 'Error saving stock');
+      toast.error(err.message || 'Impossible d’enregistrer le stock');
     } finally {
       setIsSubmitting(false);
     }
@@ -145,10 +143,10 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            Inventory & Stock Audit Logs
+            {t.adminInventoryStockLogs || 'Inventaire & Journal des Stocks'}
           </h1>
           <p className="text-sm text-slate-500">
-            Real-time stock control, threshold alerts, and automated stock movement tracking
+            Contrôle des stocks en temps réel, alertes de seuil et historique automatisé des mouvements
           </p>
         </div>
       </div>
@@ -157,37 +155,37 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-bold uppercase tracking-wider">Total Units in Stock</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Unités Totales en Stock</span>
             <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
               <Boxes className="w-4 h-4" />
             </div>
           </div>
           <div className="text-2xl font-black text-slate-900 dark:text-slate-100">
-            {totalStockUnits.toLocaleString()} units
+            {totalStockUnits.toLocaleString()} unités
           </div>
-          <p className="text-xs text-slate-400">Across {inventories.length} catalog items</p>
+          <p className="text-xs text-slate-400">Sur {inventories.length} articles au catalogue</p>
         </div>
 
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-bold uppercase tracking-wider">Low Stock Alerts</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Alertes de Stock Bas</span>
             <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
               <AlertTriangle className="w-4 h-4 text-amber-500" />
             </div>
           </div>
-          <div className="text-2xl font-black text-amber-600 dark:text-amber-400">{lowStockCount} items</div>
-          <p className="text-xs text-slate-400">Below minimum threshold</p>
+          <div className="text-2xl font-black text-amber-600 dark:text-amber-400">{lowStockCount} articles</div>
+          <p className="text-xs text-slate-400">Sous le seuil minimum configuré</p>
         </div>
 
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-bold uppercase tracking-wider">Out of Stock</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Ruptures de Stock</span>
             <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
               <PackageX className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-black text-rose-600 dark:text-rose-400">{outOfStockCount} items</div>
-          <p className="text-xs text-slate-400">Requires urgent restock</p>
+          <div className="text-2xl font-black text-rose-600 dark:text-rose-400">{outOfStockCount} articles</div>
+          <p className="text-xs text-slate-400">Réapprovisionnement nécessaire</p>
         </div>
       </div>
 
@@ -197,7 +195,7 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
           <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
           <Input
             type="text"
-            placeholder="Search by SKU or Product Title..."
+            placeholder="Rechercher par SKU ou Titre du Produit..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-9 text-xs pl-9 rounded-xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950"
@@ -206,10 +204,10 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
 
         <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto text-xs">
           {[
-            { label: 'All Items', value: 'ALL' },
-            { label: 'Healthy Stock', value: 'HEALTHY' },
-            { label: 'Low Stock Alerts', value: 'LOW' },
-            { label: 'Out of Stock', value: 'OUT' },
+            { label: 'Tous les Articles', value: 'ALL' },
+            { label: 'Stock Normal', value: 'HEALTHY' },
+            { label: 'Alertes Stock Faible', value: 'LOW' },
+            { label: 'Ruptures de Stock', value: 'OUT' },
           ].map((tab) => (
             <button
               key={tab.value}
@@ -227,16 +225,16 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
       </div>
 
       {/* Inventory Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm max-w-full">
+        <div className="overflow-x-auto smooth-scroll-x rounded-2xl w-full">
+          <table className="w-full min-w-[650px] text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase font-bold text-[10px]">
                 <th className="py-3 px-4">SKU</th>
-                <th className="py-3 px-4">Product / Item</th>
-                <th className="py-3 px-4">Current Stock</th>
-                <th className="py-3 px-4">Threshold</th>
-                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Produit / Article</th>
+                <th className="py-3 px-4">Stock Actuel</th>
+                <th className="py-3 px-4">Seuil Minimum</th>
+                <th className="py-3 px-4">Statut</th>
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -244,12 +242,12 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
               {filteredInventories.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-400">
-                    No inventory records match the selected search or filter.
+                    Aucun article d’inventaire ne correspond à votre recherche.
                   </td>
                 </tr>
               ) : (
                 filteredInventories.map((inv: any) => {
-                  const title = inv.product?.title || inv.variant?.title || 'Product Item';
+                  const title = inv.product?.title || inv.variant?.title || 'Produit';
                   const sku = inv.product?.sku || inv.variant?.sku || 'SKU-NONE';
                   const isOut = inv.quantity <= 0;
                   const isLow = inv.quantity > 0 && inv.quantity <= inv.lowStockThreshold;
@@ -260,25 +258,25 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
                       <td className="py-3.5 px-4">
                         <div className="font-bold text-slate-900 dark:text-slate-100">{title}</div>
                         <div className="text-[10px] text-slate-400">
-                          Store: {inv.product?.vendor?.store?.name || inv.product?.vendor?.businessName || 'Marketplace'}
+                          Boutique : {inv.product?.vendor?.store?.name || inv.product?.vendor?.businessName || 'Marketplace'}
                         </div>
                       </td>
                       <td className="py-3.5 px-4 font-black text-base text-slate-900 dark:text-slate-100">
                         {inv.quantity}
                       </td>
-                      <td className="py-3.5 px-4 text-slate-500">{inv.lowStockThreshold} units</td>
+                      <td className="py-3.5 px-4 text-slate-500">{inv.lowStockThreshold} unités</td>
                       <td className="py-3.5 px-4">
                         {isOut ? (
                           <Badge variant="destructive" className="uppercase font-bold text-[10px]">
-                            Out of Stock
+                            Rupture de Stock
                           </Badge>
                         ) : isLow ? (
                           <Badge variant="warning" className="uppercase font-bold text-[10px]">
-                            Low Stock Alert
+                            Stock Faible
                           </Badge>
                         ) : (
                           <Badge variant="success" className="uppercase font-bold text-[10px]">
-                            Healthy Stock
+                            Stock Normal
                           </Badge>
                         )}
                       </td>
@@ -289,14 +287,14 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
                           onClick={() => setHistoryInv(inv)}
                           className="h-7 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                         >
-                          <History className="w-3.5 h-3.5 mr-1" /> Logs
+                          <History className="w-3.5 h-3.5 mr-1" /> Journal
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => handleOpenAdjust(inv)}
                           className="h-7 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-sm rounded-lg"
                         >
-                          Adjust Stock
+                          Ajuster le Stock
                         </Button>
                       </td>
                     </tr>
@@ -313,23 +311,23 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
         <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-extrabold text-slate-900 dark:text-slate-100">
-              Adjust Stock Inventory
+              Ajuster l’Inventaire de Stock
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
-              Update quantity and stock thresholds for {selectedInv?.product?.title || selectedInv?.variant?.title || 'product'}.
+              Mettre à jour les quantités et seuils d’alerte pour {selectedInv?.product?.title || selectedInv?.variant?.title || 'le produit'}.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSaveStock} className="space-y-4 pt-2">
             {/* Adjustment Type Selector */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Adjustment Type</label>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Type d’Ajustement</label>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { id: 'RESTOCK', label: '+ Restock Add', icon: Plus },
-                  { id: 'ADJUSTMENT', label: '= Set Quantity', icon: RefreshCw },
-                  { id: 'SALE', label: '- Manual Sale', icon: Minus },
-                  { id: 'RETURN', label: '+ Customer Return', icon: ArrowUpRight },
+                  { id: 'RESTOCK', label: '+ Réassort', icon: Plus },
+                  { id: 'ADJUSTMENT', label: '= Définir Quantité', icon: RefreshCw },
+                  { id: 'SALE', label: '- Vente Manuelle', icon: Minus },
+                  { id: 'RETURN', label: '+ Retour Client', icon: ArrowUpRight },
                 ].map((item) => {
                   const Icon = item.icon;
                   const isSelected = adjustmentType === item.id;
@@ -356,7 +354,7 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  {adjustmentType === 'ADJUSTMENT' ? 'New Total Quantity' : 'Quantity Units'}
+                  {adjustmentType === 'ADJUSTMENT' ? 'Nouvelle Quantité Totale' : 'Unités'}
                 </label>
                 <Input
                   type="number"
@@ -369,7 +367,7 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Low Stock Alert Threshold</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Seuil d’Alerte Stock Bas</label>
                 <Input
                   type="number"
                   min="0"
@@ -383,10 +381,10 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
 
             {/* Reason / Audit Notes */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Reason / Notes (Optional)</label>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Motif / Remarques (Optionnel)</label>
               <Input
                 type="text"
-                placeholder="e.g. Received new shipment batch #904"
+                placeholder="ex: Réception du lot de livraison n° 904"
                 value={reasonInput}
                 onChange={(e) => setReasonInput(e.target.value)}
                 className="h-10 text-xs rounded-xl bg-slate-50 dark:bg-slate-950"
@@ -395,7 +393,7 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
 
             <DialogFooter className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setSelectedInv(null)} className="rounded-xl text-xs">
-                Cancel
+                Annuler
               </Button>
               <Button
                 type="submit"
@@ -405,10 +403,10 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
                 {isSubmitting ? (
                   <>
                     <Spinner size="sm" variant="primary" className="mr-2" />
-                    <span>Saving...</span>
+                    <span>Enregistrement...</span>
                   </>
                 ) : (
-                  'Update Stock'
+                  'Mettre à jour le Stock'
                 )}
               </Button>
             </DialogFooter>
@@ -421,25 +419,25 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
         <DialogContent className="sm:max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-extrabold text-slate-900 dark:text-slate-100">
-              Stock Movement Audit Logs
+              Journal des Mouvements de Stock
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
-              Historical logs for {historyInv?.product?.title || historyInv?.variant?.title || 'item'}.
+              Historique des mouvements pour {historyInv?.product?.title || historyInv?.variant?.title || 'l’article'}.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 pt-2 max-h-80 overflow-y-auto pr-1">
             {!historyInv?.movements || historyInv.movements.length === 0 ? (
-              <p className="text-xs text-slate-400 py-4 text-center">No movement logs recorded yet for this item.</p>
+              <p className="text-xs text-slate-400 py-4 text-center">Aucun mouvement enregistré pour cet article.</p>
             ) : (
               historyInv.movements.map((mov: any) => (
                 <div key={mov.id} className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
                   <div>
                     <div className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                       <span className="uppercase text-[10px] font-extrabold px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                        {mov.type}
+                        {mov.type === 'RESTOCK' ? 'RÉASSORT' : mov.type === 'SALE' ? 'VENTE' : mov.type === 'RETURN' ? 'RETOUR' : mov.type}
                       </span>
-                      <span>{mov.reason || 'Stock Update'}</span>
+                      <span>{mov.reason || 'Mise à jour du stock'}</span>
                     </div>
                     <p className="text-[10px] text-slate-400 pt-1">{formatDate(mov.createdAt)}</p>
                   </div>
@@ -462,7 +460,7 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
 
           <DialogFooter className="pt-4 border-t border-slate-100 dark:border-slate-800">
             <Button variant="outline" onClick={() => setHistoryInv(null)} className="w-full rounded-xl text-xs font-bold">
-              Close Logs
+              Fermer le Journal
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -470,3 +468,4 @@ export function InventoryManagerClient({ initialInventories }: InventoryManagerC
     </div>
   );
 }
+

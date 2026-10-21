@@ -201,48 +201,48 @@ export async function POST(request: Request) {
     }).join('\n\n');
 
     const shippingMethodTitle = shippingMethod === 'EXPRESS'
-      ? 'Express Air Courier ($19.99)'
+      ? 'Courrier Express Aérien (19,99 $)'
       : shippingMethod === 'OVERNIGHT'
-      ? 'Overnight Priority ($34.99)'
-      : `Standard Courier Shipping (${shippingFee === 0 ? 'FREE' : '$9.99'})`;
+      ? 'Livraison Prioritaire 24h (34,99 $)'
+      : `Livraison Standard par Coursier (${shippingFee === 0 ? 'GRATUIT' : '9,99 $'})`;
 
-    const whatsappMessageText = `🛍️ *NEW ORDER - #${orderNumber}*
+    const whatsappMessageText = `🛍️ *NOUVELLE COMMANDE - #${orderNumber}*
 ----------------------------------
-👤 *Customer Details:*
-• *Name:* ${shippingAddress.fullName}
-• *Email:* ${shippingAddress.email || 'N/A'}
-• *Phone:* ${shippingAddress.phoneNumber || 'N/A'}
+👤 *Détails du Client :*
+• *Nom :* ${shippingAddress.fullName}
+• *Email :* ${shippingAddress.email || 'N/A'}
+• *Téléphone :* ${shippingAddress.phoneNumber || 'N/A'}
 
-📍 *Delivery Address:*
+📍 *Adresse de Livraison :*
 ${shippingAddress.street}${shippingAddress.apartment ? `, ${shippingAddress.apartment}` : ''}
 ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.postalCode}, ${shippingAddress.country || 'US'}
 
-🚚 *Shipping Method:*
+🚚 *Mode de Livraison :*
 ${shippingMethodTitle}
 
-📦 *Products Ordered:*
+📦 *Articles Commandés :*
 ${itemsListText}
 
 ----------------------------------
-💰 *Order Summary:*
-• Subtotal: $${serverSubtotal.toFixed(2)}
-• Shipping: ${shippingFee === 0 ? 'FREE' : `$${shippingFee.toFixed(2)}`}
-• Tax (8%): $${taxFee.toFixed(2)}
-${discountTotal > 0 ? `• Discount (${couponCode}): -$${discountTotal.toFixed(2)}\n` : ''}• *GRAND TOTAL:* *$${grandTotal.toFixed(2)}*
+💰 *Récapitulatif de la Commande :*
+• Sous-total : ${serverSubtotal.toFixed(2)} $
+• Livraison : ${shippingFee === 0 ? 'GRATUIT' : `${shippingFee.toFixed(2)} $`}
+• Taxes (8%) : ${taxFee.toFixed(2)} $
+${discountTotal > 0 ? `• Réduction (${couponCode}) : -${discountTotal.toFixed(2)} $\n` : ''}• *TOTAL GÉNÉRAL :* *${grandTotal.toFixed(2)} $*
 ----------------------------------
-📌 *Status:* Submitted via WhatsApp Direct Checkout
+📌 *Statut :* Transmis via Commande Directe WhatsApp Dashato
 
-Please confirm this order. Thank you!`;
+Merci de confirmer la prise en charge de cette commande. À très bientôt !`;
 
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMessageText)}`;
 
     // Send Notification
     await NotificationService.send({
       userId: newOrder.userId,
-      title: `Order ${newOrder.orderNumber} Submitted!`,
-      message: `Your order has been formatted and sent to the shop owner via WhatsApp. Total: $${grandTotal.toFixed(2)}.`,
+      title: `Commande ${newOrder.orderNumber} enregistrée !`,
+      message: `Votre commande a été préparée et transmise au vendeur via WhatsApp. Total : ${grandTotal.toFixed(2)} $.`,
       type: 'ORDER',
-      link: `/account/orders/${newOrder.id}`,
+      link: `/account/orders`,
     });
 
     return NextResponse.json({

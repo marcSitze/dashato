@@ -10,13 +10,8 @@ import {
   Heart,
   MapPin,
   Shield,
-  CreditCard,
   User,
-  Clock,
-  ChevronRight,
-  TrendingUp,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { SignOutButton } from '@/components/auth/sign-out-button';
@@ -66,28 +61,28 @@ export default async function CustomerDashboardPage() {
                 {user?.name ? user.name[0] : 'C'}
               </div>
               <div>
-                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{user?.name || 'Customer Account'}</h3>
-                <p className="text-xs text-slate-400">{user?.email || 'sarah@example.com'}</p>
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{user?.name || 'Compte Client'}</h3>
+                <p className="text-xs text-slate-400">{user?.email || ''}</p>
               </div>
             </div>
 
             <nav className="space-y-1 text-sm font-semibold">
               <Link href="/account" className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                <User className="w-4 h-4" /> Account Overview
+                <User className="w-4 h-4" /> Vue d'ensemble
               </Link>
               <Link href="/account/orders" className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
-                <Package className="w-4 h-4" /> My Orders ({ordersCount})
+                <Package className="w-4 h-4" /> Mes Commandes ({ordersCount})
               </Link>
               <Link href="/account/wishlist" className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
-                <Heart className="w-4 h-4" /> Wishlist ({wishlistCount})
+                <Heart className="w-4 h-4" /> Favoris ({wishlistCount})
               </Link>
 
               <Link href="/account/addresses" className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
-                <MapPin className="w-4 h-4" /> Saved Addresses
+                <MapPin className="w-4 h-4" /> Adresses Enregistrées
               </Link>
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                 <SignOutButton className="w-full justify-start text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 font-bold rounded-xl text-xs px-3 py-2">
-                  Sign Out & Logout
+                  Déconnexion
                 </SignOutButton>
               </div>
             </nav>
@@ -96,7 +91,7 @@ export default async function CustomerDashboardPage() {
           {/* Main Account Overview Content */}
           <div className="lg:col-span-9 space-y-6">
             <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-              Customer Account Dashboard
+              Tableau de Bord Client
             </h1>
 
             {/* Quick Stat Cards */}
@@ -106,7 +101,7 @@ export default async function CustomerDashboardPage() {
                   <Package className="w-5 h-5" />
                 </div>
                 <div className="text-2xl font-black text-slate-900 dark:text-slate-100">{ordersCount}</div>
-                <div className="text-xs text-slate-500 font-semibold">Total Orders Placed</div>
+                <div className="text-xs text-slate-500 font-semibold">Commandes Effectuées</div>
               </div>
 
               <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
@@ -114,29 +109,29 @@ export default async function CustomerDashboardPage() {
                   <Heart className="w-5 h-5" />
                 </div>
                 <div className="text-2xl font-black text-slate-900 dark:text-slate-100">{wishlistCount}</div>
-                <div className="text-xs text-slate-500 font-semibold">Saved Wishlist Items</div>
+                <div className="text-xs text-slate-500 font-semibold">Articles en Favoris</div>
               </div>
 
               <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
                 <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
                   <Shield className="w-5 h-5" />
                 </div>
-                <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">Verified</div>
-                <div className="text-xs text-slate-500 font-semibold">Account Protection</div>
+                <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">Actif & Vérifié</div>
+                <div className="text-xs text-slate-500 font-semibold">Protection du Compte</div>
               </div>
             </div>
 
             {/* Recent Orders List */}
             <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">Recent Orders</h3>
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">Commandes Récentes</h3>
                 <Link href="/account/orders" className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline">
-                  View All Orders
+                  Voir Toutes les Commandes
                 </Link>
               </div>
 
               {recentOrders.length === 0 ? (
-                <p className="text-sm text-slate-400 py-4">No recent orders found.</p>
+                <p className="text-sm text-slate-400 py-4">Aucune commande récente trouvée.</p>
               ) : (
                 <div className="space-y-3">
                   {recentOrders.map((ord: any) => (
@@ -146,12 +141,12 @@ export default async function CustomerDashboardPage() {
                           <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">{ord.orderNumber}</span>
                           <Badge variant="success" className="text-[10px] uppercase font-bold">{ord.status}</Badge>
                         </div>
-                        <p className="text-xs text-slate-500 mt-0.5">{formatDate(ord.createdAt)} • {ord.items.length} item(s)</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Commandé le {formatDate(ord.createdAt)} • {ord.items.length} article(s)</p>
                       </div>
                       <div className="text-right">
                         <div className="font-extrabold text-sm text-slate-900 dark:text-slate-100">{formatCurrency(ord.grandTotal)}</div>
                         <Link href="/account/orders" className="text-xs font-semibold text-amber-600 hover:underline">
-                          Details & Tracking
+                          Détails & Suivi
                         </Link>
                       </div>
                     </div>
@@ -167,3 +162,4 @@ export default async function CustomerDashboardPage() {
     </div>
   );
 }
+

@@ -5,7 +5,7 @@ import { AnnouncementBar } from '@/components/storefront/announcement-bar';
 import { Header } from '@/components/storefront/header';
 import { Footer } from '@/components/storefront/footer';
 import { CartDrawer } from '@/components/storefront/cart-drawer';
-import { Package, Truck, FileText, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Package, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency, formatDate } from '@/lib/utils';
@@ -38,16 +38,16 @@ export default async function CustomerOrdersPage() {
 
       <main className="flex-1 max-w-7xl mx-auto px-4 py-10 w-full">
         <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight mb-8">
-          My Order History & Shipment Tracking
+          Historique de Commandes & Suivi des Colis
         </h1>
 
         {orders.length === 0 ? (
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800 shadow-sm max-w-md mx-auto space-y-4">
             <Package className="w-12 h-12 text-slate-400 mx-auto" />
-            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">No Orders Found</h2>
-            <p className="text-sm text-slate-500">You haven't placed any orders on Dashato yet.</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Aucune commande trouvée</h2>
+            <p className="text-sm text-slate-500">Vous n'avez pas encore passé de commande sur Dashato.</p>
             <Link href="/products">
-              <Button className="bg-amber-500 text-slate-950 font-bold rounded-xl">Start Shopping</Button>
+              <Button className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl">Commencer mes achats</Button>
             </Link>
           </div>
         ) : (
@@ -61,11 +61,11 @@ export default async function CustomerOrdersPage() {
                       <span className="font-extrabold text-slate-900 dark:text-slate-100 text-base">{ord.orderNumber}</span>
                       <Badge variant="success" className="uppercase font-bold text-[10px]">{ord.status}</Badge>
                     </div>
-                    <span className="text-slate-400">Placed on {formatDate(ord.createdAt)}</span>
+                    <span className="text-slate-400">Commandé le {formatDate(ord.createdAt)}</span>
                   </div>
 
                   <div className="text-left sm:text-right">
-                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Total Amount</span>
+                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Montant Total</span>
                     <span className="text-lg font-black text-amber-600 dark:text-amber-400">{formatCurrency(ord.grandTotal)}</span>
                   </div>
                 </div>
@@ -84,7 +84,7 @@ export default async function CustomerOrdersPage() {
                           <Link href={`/products/${item.product.slug}`} className="font-bold text-slate-900 dark:text-slate-100 hover:text-amber-500">
                             {item.product.title}
                           </Link>
-                          <p className="text-slate-400">Fulfilled by: {item.vendor.store?.name || item.vendor.businessName} • Qty: {item.quantity}</p>
+                          <p className="text-slate-400">Expédié par : {item.vendor.store?.name || item.vendor.businessName} • Qté : {item.quantity}</p>
                         </div>
                       </div>
                       <span className="font-extrabold text-slate-900 dark:text-slate-100">{formatCurrency(item.totalPrice)}</span>
@@ -98,8 +98,8 @@ export default async function CustomerOrdersPage() {
                     <div className="flex items-center gap-2">
                       <Truck className="w-4 h-4 text-amber-500" />
                       <div>
-                        <span className="font-bold text-slate-900 dark:text-slate-100">Tracking Carrier: {ord.shipments[0].carrier}</span>
-                        <p className="text-slate-500 font-mono">Tracking #: {ord.shipments[0].trackingNumber}</p>
+                        <span className="font-bold text-slate-900 dark:text-slate-100">Transporteur : {ord.shipments[0].carrier || 'Standard'}</span>
+                        <p className="text-slate-500 font-mono">N° de suivi : {ord.shipments[0].trackingNumber || 'En attente'}</p>
                       </div>
                     </div>
                     <Badge variant="secondary" className="font-bold">{ord.shipments[0].status}</Badge>
@@ -115,3 +115,4 @@ export default async function CustomerOrdersPage() {
     </div>
   );
 }
+

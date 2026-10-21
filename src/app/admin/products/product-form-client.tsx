@@ -140,7 +140,7 @@ export function ProductFormClient({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description || !sku || !price || !categoryId) {
-      toast.error("Please fill in all required fields");
+      toast.error("Veuillez remplir tous les champs obligatoires");
       return;
     }
 
@@ -174,40 +174,40 @@ export function ProductFormClient({
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to save product");
+      if (!res.ok) throw new Error(data.error || "Erreur lors de l'enregistrement du produit");
 
       toast.success(
         initialData
-          ? "Product updated successfully!"
-          : "Product created successfully!",
+          ? "Produit mis à jour avec succès !"
+          : "Produit créé avec succès !",
       );
       const targetPath = redirectPath || (isVendorUser ? "/vendor/products" : "/admin/products");
       router.push(targetPath);
       router.refresh();
     } catch (err: any) {
-      toast.error(err.message || "Product save error");
+      toast.error(err.message || "Erreur de sauvegarde");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Card className="rounded-3xl p-8 border-slate-200 dark:border-slate-800 shadow-sm">
+    <Card className="rounded-3xl p-4 sm:p-8 border-slate-200 dark:border-slate-800 shadow-sm max-w-full">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Main Details */}
         <div className="space-y-4">
           <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-2">
-            General Product Information
+            Informations Générales sur le Produit
           </h3>
 
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-              Product Title *
+              Titre du Produit *
             </label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Apple MacBook Pro 16 M3 Max"
+              placeholder="ex: Apple MacBook Pro 16 M3 Max"
               className="rounded-xl"
               required
             />
@@ -216,7 +216,7 @@ export function ProductFormClient({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Product SKU *
+                SKU Produit *
               </label>
               <Input
                 value={sku}
@@ -228,31 +228,31 @@ export function ProductFormClient({
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Status Workflow
+                Statut de Publication
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-xs font-bold"
               >
-                <option value="ACTIVE">ACTIVE</option>
-                <option value="PENDING_APPROVAL">PENDING APPROVAL</option>
-                <option value="DRAFT">DRAFT</option>
-                <option value="ARCHIVED">ARCHIVED</option>
+                <option value="ACTIVE">ACTIF</option>
+                <option value="PENDING_APPROVAL">EN ATTENTE D'APPROBATION</option>
+                <option value="DRAFT">BROUILLON</option>
+                <option value="ARCHIVED">ARCHIVÉ</option>
               </select>
             </div>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-              Full Description *
+              Description Complète *
             </label>
             <textarea
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-              placeholder="Detailed tech specs, user guide, and features..."
+              placeholder="Spécifications détaillées, caractéristiques et fonctionnalités..."
               required
             />
           </div>
@@ -261,13 +261,13 @@ export function ProductFormClient({
         {/* Pricing & Stock */}
         <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
           <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-2">
-            Pricing & Inventory Stock
+            Tarification & Stock d'Inventaire
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Retail Price ($USD) *
+                Prix de Vente ($USD) *
               </label>
               <Input
                 type="number"
@@ -282,7 +282,7 @@ export function ProductFormClient({
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Compare Price (MSRP)
+                Prix Conseillé (MSRP)
               </label>
               <Input
                 type="number"
@@ -296,7 +296,7 @@ export function ProductFormClient({
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Available Stock Quantity *
+                Quantité en Stock Disponible *
               </label>
               <Input
                 type="number"
@@ -312,21 +312,21 @@ export function ProductFormClient({
         {/* Category, Brand, & Vendor */}
         <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
           <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-2">
-            Classification & Seller
+            Classification & Boutique Vendeur
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Category *
+                  Catégorie *
                 </label>
                 <button
                   type="button"
                   onClick={() => setNewCatModalOpen(true)}
                   className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
                 >
-                  <Plus className="w-3 h-3" /> Quick Add Category
+                  <Plus className="w-3 h-3" /> Ajouter Catégorie
                 </button>
               </div>
               <select
@@ -344,7 +344,7 @@ export function ProductFormClient({
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Brand
+                Marque
               </label>
               <select
                 value={brandId}
@@ -362,11 +362,11 @@ export function ProductFormClient({
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Fulfilling Vendor Store *
+                  Boutique Vendeur d'Expédition *
                 </label>
                 {(isVendorUser || userVendorId) && (
                   <span className="text-[10px] font-extrabold uppercase text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                    Locked to your store
+                    Votre boutique
                   </span>
                 )}
               </div>
@@ -386,10 +386,10 @@ export function ProductFormClient({
           </div>
         </div>
 
-        {/* Product Media Gallery Manager (Images & Videos) */}
+        {/* Product Media Gallery Manager */}
         <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
           <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-2">
-            Product Media Gallery (Supabase Upload)
+            Galerie Médias du Produit (Téléversement Supabase)
           </h3>
 
           <MediaUploader mediaUrls={images} onChange={setImages} />
@@ -399,17 +399,17 @@ export function ProductFormClient({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-base px-8 shadow-lg shadow-amber-500/20"
+            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-base px-8 shadow-lg shadow-amber-500/20 w-full sm:w-auto"
           >
             {isSubmitting ? (
               <>
                 <Spinner size="sm" variant="white" className="mr-2" />
-                <span>Saving Product...</span>
+                <span>Enregistrement du produit...</span>
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                <span>{initialData ? 'Update Product' : 'Create Product'}</span>
+                <span>{initialData ? 'Mettre à jour le Produit' : 'Créer le Produit'}</span>
               </>
             )}
           </Button>
@@ -421,22 +421,22 @@ export function ProductFormClient({
         <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6">
           <DialogHeader>
             <DialogTitle className="text-lg font-extrabold text-slate-900 dark:text-slate-100">
-              Quick Create Category
+              Création Rapide de Catégorie
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
-              Add a new category to the marketplace catalog for products.
+              Ajoutez un nouveau rayon au catalogue pour classer vos produits.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleQuickAddCategory} className="space-y-4 pt-2">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Category Name *
+                Nom de la Catégorie *
               </label>
               <Input
                 type="text"
                 required
-                placeholder="e.g. Smart Audio & Sound"
+                placeholder="ex: Audio & Son Spatial"
                 value={newCatName}
                 onChange={(e) => setNewCatName(e.target.value)}
                 className="h-10 text-sm rounded-xl font-bold bg-slate-50 dark:bg-slate-950"
@@ -445,11 +445,11 @@ export function ProductFormClient({
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Description (Optional)
+                Description (Optionnelle)
               </label>
               <Input
                 type="text"
-                placeholder="Brief summary of department items..."
+                placeholder="Bref résumé des articles du rayon..."
                 value={newCatDesc}
                 onChange={(e) => setNewCatDesc(e.target.value)}
                 className="h-10 text-xs rounded-xl bg-slate-50 dark:bg-slate-950"
@@ -463,7 +463,7 @@ export function ProductFormClient({
                 onClick={() => setNewCatModalOpen(false)}
                 className="rounded-xl text-xs"
               >
-                Cancel
+                Annuler
               </Button>
               <Button
                 type="submit"
@@ -473,10 +473,10 @@ export function ProductFormClient({
                 {isCreatingCat ? (
                   <>
                     <Spinner size="sm" variant="primary" className="mr-2" />
-                    <span>Creating...</span>
+                    <span>Création...</span>
                   </>
                 ) : (
-                  'Create Category'
+                  'Créer la Catégorie'
                 )}
               </Button>
             </DialogFooter>

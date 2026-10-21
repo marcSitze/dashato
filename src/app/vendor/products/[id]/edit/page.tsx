@@ -50,14 +50,14 @@ export default async function VendorEditProductPage({
             href="/vendor/products"
             className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 mb-2"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to My Store Products
+            <ArrowLeft className="w-3.5 h-3.5" /> Retour aux Produits de la Boutique
           </Link>
           <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
             <Package className="w-8 h-8 text-amber-500" />
-            Edit Store Product: {product.title}
+            Modifier le Produit : {product.title}
           </h1>
           <p className="text-sm text-slate-500">
-            Update pricing, media images/videos, description, stock quantity, or workflow status.
+            Mettez à jour le prix, les médias, la description, le stock et le statut de publication.
           </p>
         </div>
       </div>

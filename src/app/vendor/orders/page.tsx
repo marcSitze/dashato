@@ -39,10 +39,10 @@ export default async function VendorOrdersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-          Store Orders & Fulfillment Queue
+          Commandes de la Boutique & Expéditions
         </h1>
         <p className="text-sm text-slate-500">
-          Manage order items purchased from your store, update shipment tracking, and manage customer fulfillments
+          Gérez les commandes de vos clients, mettez à jour le suivi des colis et suivez les livraisons
         </p>
       </div>
 
@@ -50,4 +50,5 @@ export default async function VendorOrdersPage() {
     </div>
   );
 }
+
 

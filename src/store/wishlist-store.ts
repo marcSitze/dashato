@@ -9,6 +9,8 @@ export interface WishlistItemType {
   image: string;
   vendorName: string;
   inStock: boolean;
+  vendorId?: string;
+  storeSlug?: string;
 }
 
 interface WishlistState {

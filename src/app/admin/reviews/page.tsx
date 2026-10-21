@@ -1,8 +1,6 @@
 import { db } from '@/lib/db';
-import { Star, CheckCircle, Trash2, Flag } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { formatDate } from '@/lib/utils';
 
 export default async function AdminReviewsPage() {
   const reviews = await db.review.findMany({
@@ -18,44 +16,51 @@ export default async function AdminReviewsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            Customer Reviews Moderation Center
+            Centre de Modération des Avis Clients
           </h1>
-          <p className="text-sm text-slate-500">Review rating feedback, approve customer reviews, and monitor vendor responses</p>
+          <p className="text-sm text-slate-500">Modérer les évaluations, approuver les avis clients et suivre les réponses des boutiques</p>
         </div>
       </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
-          {reviews.map((rev: any) => (
-            <div key={rev.id} className="py-4 first:pt-0 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-sm text-slate-900 dark:text-slate-100">{rev.user.name}</span>
-                  <span className="text-xs text-slate-400">on <strong className="text-slate-700 dark:text-slate-300">{rev.product.title}</strong></span>
-                  <div className="flex items-center text-amber-400">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={`w-3.5 h-3.5 ${i < rev.rating ? 'fill-amber-400' : 'text-slate-300'}`} />
-                    ))}
+        {reviews.length === 0 ? (
+          <div className="text-center py-8 text-slate-400 text-xs">
+            Aucun avis à modérer pour le moment.
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {reviews.map((rev: any) => (
+              <div key={rev.id} className="py-4 first:pt-0 space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-bold text-sm text-slate-900 dark:text-slate-100">{rev.user.name}</span>
+                    <span className="text-xs text-slate-400">sur <strong className="text-slate-700 dark:text-slate-300 line-clamp-1">{rev.product.title}</strong></span>
+                    <div className="flex items-center text-amber-400">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className={`w-3.5 h-3.5 ${i < rev.rating ? 'fill-amber-400' : 'text-slate-300'}`} />
+                      ))}
+                    </div>
                   </div>
+                  <Badge variant={rev.status === 'APPROVED' ? 'success' : 'warning'} className="uppercase font-bold text-[10px] w-fit">
+                    {rev.status === 'APPROVED' ? 'APPROUVÉ' : rev.status === 'PENDING' ? 'EN ATTENTE' : rev.status}
+                  </Badge>
                 </div>
-                <Badge variant={rev.status === 'APPROVED' ? 'success' : 'warning'} className="uppercase font-bold text-[10px]">
-                  {rev.status}
-                </Badge>
+
+                {rev.title && <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">{rev.title}</h4>}
+                <p className="text-xs text-slate-600 dark:text-slate-300">{rev.comment}</p>
+
+                {rev.vendorReply && (
+                  <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-1">
+                    <span className="font-bold text-amber-600">Réponse de la Boutique :</span>
+                    <p className="text-slate-700 dark:text-slate-300">{rev.vendorReply}</p>
+                  </div>
+                )}
               </div>
-
-              {rev.title && <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">{rev.title}</h4>}
-              <p className="text-xs text-slate-600 dark:text-slate-300">{rev.comment}</p>
-
-              {rev.vendorReply && (
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-1">
-                  <span className="font-bold text-amber-600">Vendor Reply:</span>
-                  <p className="text-slate-700 dark:text-slate-300">{rev.vendorReply}</p>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
+

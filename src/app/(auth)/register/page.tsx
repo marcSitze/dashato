@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n/context';
 import { AnnouncementBar } from '@/components/storefront/announcement-bar';
 import { Header } from '@/components/storefront/header';
 import { Footer } from '@/components/storefront/footer';
@@ -13,6 +14,7 @@ import { toast } from 'sonner';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -31,12 +33,14 @@ export default function RegisterPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Registration failed');
+      if (!res.ok) throw new Error(data.error || 'Erreur lors de la création du compte');
 
-      toast.success('Account created! Please sign in.');
+      toast.success(
+        t.accountCreatedSuccessToast || 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.'
+      );
       router.push('/login');
     } catch (err: any) {
-      toast.error(err.message || 'Registration error');
+      toast.error(err.message || 'Erreur d’inscription');
     } finally {
       setIsSubmitting(false);
     }
@@ -63,53 +67,66 @@ export default function RegisterPage() {
               />
             </div>
             <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-              Create Your Dashato Account
+              {t.createAccountTitle || 'Créer un Compte'}
             </h1>
-            <p className="text-xs text-slate-500">Join our multi-vendor marketplace platform</p>
+            <p className="text-xs text-slate-500">
+              {t.createAccountSubtitle || 'Rejoignez Dashato pour découvrir nos produits d’exception et suivre vos commandes'}
+            </p>
           </div>
 
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Full Name</label>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                {t.nameLabel || 'Nom Complet'}
+              </label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                placeholder="ex: Jean Dupont"
                 className="rounded-xl"
                 required
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Email Address</label>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                {t.emailLabel || 'Adresse Email'}
+              </label>
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="jean.dupont@exemple.com"
                 className="rounded-xl"
                 required
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Password</label>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                {t.passwordLabel || 'Mot de Passe'}
+              </label>
               <Input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="rounded-xl"
+                placeholder="••••••••"
+                className="rounded-xl font-mono"
                 required
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Account Type</label>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                Type de Compte
+              </label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as any)}
-                className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-xs font-bold"
+                className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-xs font-bold text-slate-800 dark:text-slate-200"
               >
-                <option value="CUSTOMER">Customer / Buyer</option>
-                <option value="VENDOR">Vendor / Merchant Seller</option>
+                <option value="CUSTOMER">Client / Acheteur</option>
+                <option value="VENDOR">Vendeur / Boutique Partenaire</option>
               </select>
             </div>
 
@@ -118,12 +135,15 @@ export default function RegisterPage() {
               disabled={isSubmitting}
               className="w-full h-12 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-base shadow-lg shadow-amber-500/20"
             >
-              {isSubmitting ? 'Creating Account...' : 'Register Account'}
+              {isSubmitting ? (t.creatingAccount || 'Création du compte...') : (t.register || 'Créer mon Compte')}
             </Button>
           </form>
 
           <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800">
-            Already have an account? <Link href="/login" className="text-amber-600 font-bold hover:underline">Sign In</Link>
+            {t.alreadyHaveAccount || 'Vous avez déjà un compte ?'}{' '}
+            <Link href="/login" className="text-amber-600 font-bold hover:underline">
+              {t.signIn || 'Se connecter'}
+            </Link>
           </div>
         </Card>
       </main>

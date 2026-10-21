@@ -104,11 +104,22 @@
   --color-amber-50: var(--tertiary);
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: clip;
+  max-width: 100vw;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sora), 'Sora', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: clip;
+  max-width: 100%;
+  width: 100%;
+  min-height: 100vh;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Custom Primary, Secondary & Tertiary Brand Utilities */
@@ -142,7 +153,36 @@ body {
   border-color: var(--tertiary);
 }
 
-/* Override default scrollbars and transitions for smooth mode switching */
-* {
+/* Performance & Touch Scroll Optimization Utilities */
+.sticky-header {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+.smooth-scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.smooth-scroll-y {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Global Border reset with border-box */
+*, *::before, *::after {
+  box-sizing: border-box;
   border-color: var(--border);
 }
+
