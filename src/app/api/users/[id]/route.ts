@@ -63,3 +63,37 @@ export async function PATCH(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+// DELETE /api/users/[id] - Delete user account (RBAC: Admin only)
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || currentUser.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 403 });
+    }
+
+    const { id } = await params;
+
+    // Prevent deleting oneself
+    if (currentUser.id === id) {
+      return NextResponse.json({ error: 'Vous ne pouvez pas supprimer votre propre compte administrateur.' }, { status: 400 });
+    }
+
+    const user = await db.user.findUnique({ where: { id } });
+    if (!user) {
+      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 });
+    }
+
+    await db.user.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true, message: 'Compte utilisateur supprimé avec succès' });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'Impossible de supprimer l\'utilisateur' }, { status: 500 });
+  }
+}
+

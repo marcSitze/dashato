@@ -16,19 +16,30 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    const { status, commissionRate, isApproved } = body;
+    const { status, commissionRate, isApproved, businessName, taxId } = body;
 
     const vendor = await db.vendor.findUnique({ where: { id } });
     if (!vendor) {
       return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
     }
 
+    let normalizedRate: number | undefined = undefined;
+    if (commissionRate !== undefined && commissionRate !== null && commissionRate !== '') {
+      const parsed = typeof commissionRate === 'number' ? commissionRate : parseFloat(commissionRate);
+      if (!isNaN(parsed)) {
+        normalizedRate = parsed > 1 ? parsed / 100 : parsed;
+        normalizedRate = Math.max(0, Math.min(1, Math.round(normalizedRate * 1000) / 1000));
+      }
+    }
+
     const updated = await db.vendor.update({
       where: { id },
       data: {
-        status: status || vendor.status,
-        isApproved: isApproved !== undefined ? isApproved : status === 'APPROVED',
-        commissionRate: commissionRate !== undefined ? parseFloat(commissionRate) : vendor.commissionRate,
+        ...(status ? { status } : {}),
+        ...(isApproved !== undefined ? { isApproved } : (status === 'APPROVED' ? { isApproved: true } : {})),
+        ...(normalizedRate !== undefined ? { commissionRate: normalizedRate } : {}),
+        ...(businessName ? { businessName } : {}),
+        ...(taxId !== undefined ? { taxId } : {}),
       },
       include: { store: true, user: true },
     });

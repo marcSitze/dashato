@@ -89,18 +89,27 @@ export function OrderDetailClient({ order }: { order: any }) {
             </h3>
 
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
-              {order.commissions.map((comm: any) => (
-                <div key={comm.id} className="py-3 first:pt-0 last:pb-0 flex items-center justify-between text-xs">
-                  <div>
-                    <span className="font-bold text-slate-900 dark:text-slate-100">{comm.vendor.store?.name || comm.vendor.businessName}</span>
-                    <p className="text-slate-500">Rate: {(comm.commissionRate * 100).toFixed(0)}% Platform Fee</p>
+              {order.commissions.map((comm: any) => {
+                const ratePercent = comm.grossAmount > 0
+                  ? Math.round((comm.feeAmount / comm.grossAmount) * 100)
+                  : Math.round((comm.vendor?.commissionRate || 0.10) * 100);
+
+                return (
+                  <div key={comm.id} className="py-3 first:pt-0 last:pb-0 flex items-center justify-between text-xs">
+                    <div>
+                      <span className="font-bold text-slate-900 dark:text-slate-100">{comm.vendor.store?.name || comm.vendor.businessName}</span>
+                      <p className="text-slate-500">Taux : {ratePercent}% de commission plateforme</p>
+                      <Badge variant={comm.status === 'PAID' ? 'success' : 'secondary'} className="text-[9px] uppercase font-bold mt-0.5">
+                        {comm.status === 'PAID' ? 'REVERSEMENT EFFECTUÉ' : 'REVERSEMENT EN ATTENTE'}
+                      </Badge>
+                    </div>
+                    <div className="text-right font-mono">
+                      <span className="block text-emerald-600 font-bold">Frais Plateforme : {formatCurrency(comm.feeAmount)}</span>
+                      <span className="block text-slate-600">Paiement Vendeur Net : {formatCurrency(comm.netAmount)}</span>
+                    </div>
                   </div>
-                  <div className="text-right font-mono">
-                    <span className="block text-emerald-600 font-bold">Platform Fee: {formatCurrency(comm.commissionAmount)}</span>
-                    <span className="block text-slate-600">Net Vendor Payout: {formatCurrency(comm.netVendorPayout)}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </Card>
         )}
