@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Package,
   FolderTree,
+  Tag,
   ShoppingCart,
   Boxes,
   LogOut,
@@ -37,6 +38,7 @@ export function VendorSidebar({ user, vendorStore }: VendorSidebarProps) {
     { name: t.vendorProductsNav || 'My Store Products', href: '/vendor/products', icon: Package },
     { name: t.vendorOrdersNav || 'Store Orders & Fulfillment', href: '/vendor/orders', icon: ShoppingCart },
     { name: t.vendorCategoriesNav || 'Categories Catalog', href: '/vendor/categories', icon: FolderTree },
+    { name: t.vendorBrandsNav || t.adminBrandPartners || 'Brand Partners', href: '/vendor/brands', icon: Tag },
     { name: t.vendorInventoryNav || 'Stock Control', href: '/vendor/inventory', icon: Boxes },
   ];
 

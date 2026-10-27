@@ -164,14 +164,48 @@ export function OrderDetailClient({ order }: { order: any }) {
             </Button>
           </form>
 
+          {/* Financial Breakdown & Customer Shipping Address */}
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3 text-xs">
+            <span className="font-bold text-slate-900 dark:text-slate-100 block">Financial Summary:</span>
+            <div className="space-y-1.5 text-slate-600 dark:text-slate-400 font-mono">
+              <div className="flex justify-between">
+                <span>Subtotal:</span>
+                <span>{formatCurrency(order.subtotal || 0)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Shipping:</span>
+                <span>{formatCurrency(order.shippingFee || 0)}</span>
+              </div>
+              {order.taxFee > 0 && (
+                <div className="flex justify-between">
+                  <span>Tax:</span>
+                  <span>{formatCurrency(order.taxFee)}</span>
+                </div>
+              )}
+              {order.discountTotal > 0 && (
+                <div className="flex justify-between text-emerald-600">
+                  <span>Discount:</span>
+                  <span>-{formatCurrency(order.discountTotal)}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-bold text-slate-900 dark:text-slate-100 text-sm pt-1 border-t border-slate-100 dark:border-slate-800">
+                <span>Grand Total:</span>
+                <span className="text-amber-600 dark:text-amber-400">{formatCurrency(order.grandTotal)}</span>
+              </div>
+            </div>
+          </div>
+
           {/* Customer Shipping Address */}
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2 text-xs">
-            <span className="font-bold text-slate-900 dark:text-slate-100">Shipping Address:</span>
-            <div className="text-slate-600 dark:text-slate-300">
-              <p className="font-semibold">{order.shippingAddress?.fullName || order.user.name}</p>
-              <p>{order.shippingAddress?.addressLine1}</p>
+            <span className="font-bold text-slate-900 dark:text-slate-100 block">Shipping Destination:</span>
+            <div className="text-slate-600 dark:text-slate-300 space-y-0.5">
+              <p className="font-semibold text-slate-900 dark:text-slate-100">{order.shippingAddress?.fullName || order.user?.name}</p>
+              <p>{order.shippingAddress?.street} {order.shippingAddress?.apartment ? `, Apt ${order.shippingAddress.apartment}` : ''}</p>
               <p>{order.shippingAddress?.city}, {order.shippingAddress?.state} {order.shippingAddress?.postalCode}</p>
-              <p>{order.shippingAddress?.country}</p>
+              <p className="font-semibold">{order.shippingAddress?.country}</p>
+              {order.shippingAddress?.phoneNumber && (
+                <p className="text-slate-400 font-mono text-[11px] pt-1">Tel: {order.shippingAddress.phoneNumber}</p>
+              )}
             </div>
           </div>
         </Card>

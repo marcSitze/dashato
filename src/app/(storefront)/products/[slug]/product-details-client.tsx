@@ -29,10 +29,19 @@ import {
   Award,
   Clock,
   Box,
+  Play,
+  Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { isVideoUrl } from "@/lib/media-utils";
+import {
+  isVideoUrl,
+  isYouTubeUrl,
+  getYouTubeEmbedUrl,
+  getYouTubeThumbnail,
+  isDirectVideoUrl,
+  findYouTubeUrls,
+} from "@/lib/media-utils";
 import { Spinner } from "@/components/ui/spinner";
 import { useCartStore } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
@@ -113,7 +122,16 @@ export function ProductDetailsClient({ product }: { product: any }) {
   }, [product.reviews]);
 
   const primaryCategory = product.categories?.[0]?.category;
-  const isSelectedVideo = isVideoUrl(selectedImage);
+  const isSelectedYouTube = isYouTubeUrl(selectedImage);
+  const isSelectedDirectVideo = isDirectVideoUrl(selectedImage);
+  const isSelectedVideo = isSelectedYouTube || isSelectedDirectVideo;
+
+  // Detect any YouTube video in gallery images or product description
+  const galleryYouTubeUrls = images
+    .filter((img: any) => isYouTubeUrl(img.url))
+    .map((img: any) => img.url);
+  const descYouTubeUrls = findYouTubeUrls(product.description);
+  const allYouTubeVideos = Array.from(new Set([...galleryYouTubeUrls, ...descYouTubeUrls]));
 
   const handleAddToCart = () => {
     if (currentStock <= 0 || isAdding) return;
@@ -190,7 +208,15 @@ export function ProductDetailsClient({ product }: { product: any }) {
         {/* Gallery Thumbnails & Large Zoom Image */}
         <div className="lg:col-span-7 space-y-4">
           <div className="aspect-[4/3] rounded-3xl overflow-hidden bg-slate-950 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md relative group">
-            {isSelectedVideo ? (
+            {isSelectedYouTube ? (
+              <iframe
+                src={getYouTubeEmbedUrl(selectedImage) || ""}
+                title={product.title}
+                className="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            ) : isSelectedDirectVideo ? (
               <video
                 src={selectedImage}
                 controls
@@ -211,7 +237,7 @@ export function ProductDetailsClient({ product }: { product: any }) {
             {currentCompareAtPrice && currentCompareAtPrice > currentPrice && (
               <Badge
                 variant="destructive"
-                className="absolute top-4 left-4 font-bold text-sm shadow-md"
+                className="absolute top-4 left-4 font-bold text-sm shadow-md pointer-events-none"
               >
                 {t.saveDiscount}{" "}
                 {Math.round(
@@ -224,7 +250,7 @@ export function ProductDetailsClient({ product }: { product: any }) {
             {/* In stock badge */}
             <Badge
               variant={currentStock > 0 ? "success" : "destructive"}
-              className="absolute top-4 right-4 font-bold text-xs shadow-md"
+              className="absolute top-4 right-4 font-bold text-xs shadow-md pointer-events-none"
             >
               {currentStock > 0 ? t.inStock : t.outOfStock}
             </Badge>
@@ -234,7 +260,11 @@ export function ProductDetailsClient({ product }: { product: any }) {
           {images.length > 1 && (
             <div className="flex items-center gap-3 overflow-x-auto smooth-scroll-x no-scrollbar pb-2">
               {images.map((img: any, idx: number) => {
-                const isVid = isVideoUrl(img.url);
+                const isYt = isYouTubeUrl(img.url);
+                const isDirect = isDirectVideoUrl(img.url);
+                const isVid = isYt || isDirect;
+                const ytThumb = isYt ? getYouTubeThumbnail(img.url) : null;
+
                 return (
                   <button
                     key={idx}
@@ -245,7 +275,20 @@ export function ProductDetailsClient({ product }: { product: any }) {
                         : "border-slate-200 dark:border-slate-800 opacity-70 hover:opacity-100"
                     }`}
                   >
-                    {isVid ? (
+                    {isYt && ytThumb ? (
+                      <>
+                        <img
+                          src={ytThumb}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-slate-950/40 flex items-center justify-center">
+                          <div className="w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center shadow-md">
+                            <Play className="w-3 h-3 fill-white ml-0.5" />
+                          </div>
+                        </div>
+                      </>
+                    ) : isDirect ? (
                       <>
                         <video
                           src={img.url}
@@ -620,6 +663,18 @@ export function ProductDetailsClient({ product }: { product: any }) {
               {product.reviews.length}
             </span>
           </button>
+          {allYouTubeVideos.length > 0 && (
+            <button
+              onClick={() => scrollTo("section-video")}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors whitespace-nowrap shadow-xs cursor-pointer"
+            >
+              <Play className="w-4 h-4 text-red-500 fill-red-500 flex-shrink-0" />
+              <span>Vidéo Démo</span>
+              <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 font-extrabold">
+                {allYouTubeVideos.length}
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -708,6 +763,52 @@ export function ProductDetailsClient({ product }: { product: any }) {
             </div>
           )}
         </section>
+
+        {/* SECTION: YOUTUBE VIDEO SHOWCASE */}
+        {allYouTubeVideos.length > 0 && (
+          <section
+            id="section-video"
+            className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 scroll-mt-28"
+          >
+            <div className="flex items-center gap-3.5 pb-5 border-b border-slate-200 dark:border-slate-800">
+              <div className="w-11 h-11 rounded-2xl bg-red-600/10 text-red-600 flex items-center justify-center flex-shrink-0">
+                <Play className="w-6 h-6 fill-red-600" />
+              </div>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
+                  <span>Présentation & Démonstration Vidéo</span>
+                  <Badge variant="destructive" className="bg-red-600 text-white font-extrabold text-[10px]">
+                    YouTube
+                  </Badge>
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                  Visualisez les caractéristiques, le déballage et le fonctionnement réel de ce produit
+                </p>
+              </div>
+            </div>
+
+            <div className={`grid grid-cols-1 ${allYouTubeVideos.length > 1 ? 'md:grid-cols-2' : ''} gap-6`}>
+              {allYouTubeVideos.map((videoUrl, vIdx) => {
+                const embedUrl = getYouTubeEmbedUrl(videoUrl);
+                if (!embedUrl) return null;
+                return (
+                  <div
+                    key={vIdx}
+                    className="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-lg relative group"
+                  >
+                    <iframe
+                      src={embedUrl}
+                      title={`${product.title} - Video Demo ${vIdx + 1}`}
+                      className="w-full h-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* SECTION 2: FICHE TECHNIQUE & SPÉCIFICATIONS COMPLÈTES */}
         <section

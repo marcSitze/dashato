@@ -1,10 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { Upload, Film, Image as ImageIcon, Trash2, Star, Link as LinkIcon, Loader2 } from 'lucide-react';
+import { Upload, Film, Image as ImageIcon, Trash2, Star, Link as LinkIcon, Loader2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { isVideoUrl } from '@/lib/media-utils';
+import { isVideoUrl, isYouTubeUrl, getYouTubeThumbnail, isDirectVideoUrl } from '@/lib/media-utils';
 import { toast } from 'sonner';
 
 interface MediaItem {
@@ -171,7 +171,7 @@ export function MediaUploader({ mediaUrls, onChange, maxFiles = 10 }: MediaUploa
           <LinkIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <Input
             type="url"
-            placeholder="Or paste image/video URL (e.g. https://...)"
+            placeholder="Coller l'URL d'une image ou vidéo YouTube (ex: https://youtube.com/watch?v=...)"
             value={externalUrl}
             onChange={(e) => setExternalUrl(e.target.value)}
             className="pl-9 rounded-xl text-xs"
@@ -197,7 +197,10 @@ export function MediaUploader({ mediaUrls, onChange, maxFiles = 10 }: MediaUploa
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {mediaUrls.map((url, idx) => {
-              const isVideo = isVideoUrl(url);
+              const isYt = isYouTubeUrl(url);
+              const isDirect = isDirectVideoUrl(url);
+              const isVideo = isYt || isDirect;
+              const ytThumb = isYt ? getYouTubeThumbnail(url) : null;
               const isMain = idx === 0;
 
               return (
@@ -208,7 +211,16 @@ export function MediaUploader({ mediaUrls, onChange, maxFiles = 10 }: MediaUploa
                   }`}
                 >
                   {/* Media Content */}
-                  {isVideo ? (
+                  {isYt && ytThumb ? (
+                    <>
+                      <img src={ytThumb} alt="" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-slate-950/30 flex items-center justify-center pointer-events-none">
+                        <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center shadow-md">
+                          <Play className="w-4 h-4 fill-white ml-0.5" />
+                        </div>
+                      </div>
+                    </>
+                  ) : isDirect ? (
                     <video src={url} className="w-full h-full object-cover" muted playsInline />
                   ) : (
                     <img src={url} alt="" className="w-full h-full object-cover" />
@@ -222,7 +234,11 @@ export function MediaUploader({ mediaUrls, onChange, maxFiles = 10 }: MediaUploa
                       </span>
                     )}
                     <span className="bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 border border-white/10">
-                      {isVideo ? (
+                      {isYt ? (
+                        <>
+                          <Play className="w-2.5 h-2.5 text-red-500 fill-red-500" /> YouTube
+                        </>
+                      ) : isDirect ? (
                         <>
                           <Film className="w-2.5 h-2.5 text-amber-400" /> Video
                         </>

@@ -49,6 +49,7 @@ export function ProductFormClient({
   redirectPath,
 }: ProductFormClientProps) {
   const router = useRouter();
+  const isEditing = Boolean(initialData?.id);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [categoryList, setCategoryList] = React.useState(categories);
   const [newCatModalOpen, setNewCatModalOpen] = React.useState(false);
@@ -110,6 +111,54 @@ export function ProductFormClient({
       setIsCreatingCat(false);
     }
   };
+
+  const [brandList, setBrandList] = React.useState(brands);
+  const [newBrandModalOpen, setNewBrandModalOpen] = React.useState(false);
+  const [newBrandName, setNewBrandName] = React.useState('');
+  const [newBrandWebsite, setNewBrandWebsite] = React.useState('');
+  const [newBrandLogo, setNewBrandLogo] = React.useState('');
+  const [newBrandDesc, setNewBrandDesc] = React.useState('');
+  const [isCreatingBrand, setIsCreatingBrand] = React.useState(false);
+
+  const handleQuickAddBrand = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBrandName.trim()) return;
+
+    setIsCreatingBrand(true);
+    try {
+      const slug = newBrandName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const res = await fetch('/api/brands', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newBrandName.trim(),
+          slug,
+          website: newBrandWebsite.trim() || undefined,
+          logo: newBrandLogo.trim() || undefined,
+          description: newBrandDesc.trim() || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to create brand');
+      }
+
+      toast.success(`Brand "${data.data.name}" created!`);
+      setBrandList((prev) => [...prev, data.data]);
+      setBrandId(data.data.id);
+      setNewBrandName('');
+      setNewBrandWebsite('');
+      setNewBrandLogo('');
+      setNewBrandDesc('');
+      setNewBrandModalOpen(false);
+    } catch (err: any) {
+      toast.error(err.message || 'Brand creation error');
+    } finally {
+      setIsCreatingBrand(false);
+    }
+  };
+
   const [brandId, setBrandId] = React.useState(
     initialData?.brandId || brands[0]?.id || "",
   );
@@ -162,10 +211,10 @@ export function ProductFormClient({
         images: images.map((url, idx) => ({ url, isMain: idx === 0 })),
       };
 
-      const url = initialData
+      const url = isEditing
         ? `/api/products/${initialData.id}`
         : "/api/products";
-      const method = initialData ? "PUT" : "POST";
+      const method = isEditing ? "PUT" : "POST";
 
       const res = await fetch(url, {
         method,
@@ -177,7 +226,7 @@ export function ProductFormClient({
       if (!res.ok) throw new Error(data.error || "Erreur lors de l'enregistrement du produit");
 
       toast.success(
-        initialData
+        isEditing
           ? "Produit mis à jour avec succès !"
           : "Produit créé avec succès !",
       );
@@ -343,15 +392,25 @@ export function ProductFormClient({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Marque
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Marque
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setNewBrandModalOpen(true)}
+                  className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" /> Ajouter Marque
+                </button>
+              </div>
               <select
                 value={brandId}
                 onChange={(e) => setBrandId(e.target.value)}
                 className="w-full h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-xs font-bold"
               >
-                {brands.map((b) => (
+                <option value="">-- Sans Marque / Générique --</option>
+                {brandList.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
                   </option>
@@ -409,7 +468,7 @@ export function ProductFormClient({
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                <span>{initialData ? 'Mettre à jour le Produit' : 'Créer le Produit'}</span>
+                <span>{isEditing ? 'Mettre à jour le Produit' : 'Créer le Produit'}</span>
               </>
             )}
           </Button>
@@ -477,6 +536,100 @@ export function ProductFormClient({
                   </>
                 ) : (
                   'Créer la Catégorie'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quick Add Brand Dialog Modal */}
+      <Dialog open={newBrandModalOpen} onOpenChange={setNewBrandModalOpen}>
+        <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-extrabold text-slate-900 dark:text-slate-100">
+              Création Rapide de Marque
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Ajoutez un nouveau fabricant ou marque partenaire au catalogue.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleQuickAddBrand} className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                Nom de la Marque *
+              </label>
+              <Input
+                type="text"
+                required
+                placeholder="ex: Sony, Apple, Bose..."
+                value={newBrandName}
+                onChange={(e) => setNewBrandName(e.target.value)}
+                className="h-10 text-sm rounded-xl font-bold bg-slate-50 dark:bg-slate-950"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                Site Web Officiel (Optionnel)
+              </label>
+              <Input
+                type="url"
+                placeholder="https://..."
+                value={newBrandWebsite}
+                onChange={(e) => setNewBrandWebsite(e.target.value)}
+                className="h-10 text-xs rounded-xl bg-slate-50 dark:bg-slate-950"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                Logo de la Marque (URL Optionnelle)
+              </label>
+              <Input
+                type="url"
+                placeholder="https://images.unsplash.com/..."
+                value={newBrandLogo}
+                onChange={(e) => setNewBrandLogo(e.target.value)}
+                className="h-10 text-xs rounded-xl bg-slate-50 dark:bg-slate-950"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                Description (Optionnelle)
+              </label>
+              <Input
+                type="text"
+                placeholder="Bref résumé ou spécialité du fabricant..."
+                value={newBrandDesc}
+                onChange={(e) => setNewBrandDesc(e.target.value)}
+                className="h-10 text-xs rounded-xl bg-slate-50 dark:bg-slate-950"
+              />
+            </div>
+
+            <DialogFooter className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setNewBrandModalOpen(false)}
+                className="rounded-xl text-xs"
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                disabled={isCreatingBrand}
+                className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs px-6 shadow-sm"
+              >
+                {isCreatingBrand ? (
+                  <>
+                    <Spinner size="sm" variant="primary" className="mr-2" />
+                    <span>Création...</span>
+                  </>
+                ) : (
+                  'Créer la Marque'
                 )}
               </Button>
             </DialogFooter>

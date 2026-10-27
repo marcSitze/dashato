@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n/context';
 import { Button } from '@/components/ui/button';
@@ -118,6 +119,15 @@ export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProp
     { key: 'DELIVERED', label: t.deliveredStatus || 'Livré' },
   ];
 
+  const [expandedRows, setExpandedRows] = React.useState<Record<string, boolean>>({});
+
+  const toggleRow = (itemId: string) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [itemId]: !prev[itemId],
+    }));
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Controls: Search & Filter Tabs */}
@@ -153,10 +163,11 @@ export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProp
       {/* Orders Table */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm max-w-full">
         <div className="overflow-x-auto smooth-scroll-x rounded-2xl w-full">
-          <table className="w-full min-w-[700px] text-left text-xs">
+          <table className="w-full min-w-[750px] text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase font-bold text-[10px]">
-                <th className="py-3 px-4">{t.orderNum || 'Commande N°'}</th>
+                <th className="py-3 px-3 w-8"></th>
+                <th className="py-3 px-3">{t.orderNum || 'Commande N°'}</th>
                 <th className="py-3 px-4">{t.customerDetails || 'Détails du Client'}</th>
                 <th className="py-3 px-4">{t.productPurchased || 'Produit Acheté'}</th>
                 <th className="py-3 px-4">{t.dateLabel || 'Date'}</th>
@@ -168,7 +179,7 @@ export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProp
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={8} className="py-12 text-center text-slate-400">
                     {t.noStoreOrdersYet || 'Aucun article de commande ne correspond à vos critères de recherche.'}
                   </td>
                 </tr>
@@ -176,60 +187,174 @@ export function VendorOrdersClient({ initialOrderItems }: VendorOrdersClientProp
                 filteredItems.map((item: any) => {
                   const isShipped = item.fulfillmentStatus === 'SHIPPED' || item.fulfillmentStatus === 'DELIVERED';
                   const isLoading = loadingItemId === item.id;
+                  const isExpanded = expandedRows[item.id] || false;
+                  const shippingAddress = item.order?.shippingAddress;
+                  const shipment = item.order?.shipments?.[0];
+                  const payment = item.order?.payments?.[0];
 
                   return (
-                    <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-950 transition-colors">
-                      <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-slate-100">
-                        {item.order?.orderNumber || 'N/A'}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-slate-900 dark:text-slate-100">{item.order?.user?.name || 'Client'}</div>
-                        <div className="text-[10px] text-slate-400">{item.order?.user?.email || 'N/A'}</div>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <div className="font-semibold text-slate-800 dark:text-slate-200">{item.product?.title || 'Produit'}</div>
-                        <div className="text-[10px] text-slate-400">{t.qty || 'Qté'}: {item.quantity} • {formatCurrency(item.unitPrice)}</div>
-                      </td>
-                      <td className="py-3.5 px-4 text-slate-500">{formatDate(item.createdAt)}</td>
-                      <td className="py-3.5 px-4">
-                        {getStatusBadge(item.fulfillmentStatus)}
-                      </td>
-                      <td className="py-3.5 px-4 font-extrabold text-slate-900 dark:text-slate-100">
-                        {formatCurrency(item.totalPrice)}
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        {isShipped ? (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleMarkStatus(item.id, 'DELIVERED')}
-                            disabled={isLoading || item.fulfillmentStatus === 'DELIVERED'}
-                            className="h-8 text-xs font-semibold rounded-xl text-purple-600 hover:bg-purple-500/10 gap-1.5"
+                    <React.Fragment key={item.id}>
+                      <tr className="hover:bg-slate-50 dark:hover:bg-slate-950 transition-colors">
+                        <td className="py-3.5 px-3">
+                          <button
+                            type="button"
+                            onClick={() => toggleRow(item.id)}
+                            className="p-1 text-slate-400 hover:text-amber-500 rounded-lg hover:bg-amber-500/10 transition-colors"
+                            title={isExpanded ? 'Masquer aperçu' : 'Afficher aperçu minimal'}
                           >
-                            {isLoading ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            {isExpanded ? (
+                              <span className="text-amber-500 font-bold">▲</span>
                             ) : (
-                              <PackageCheck className="w-3.5 h-3.5 text-purple-500" />
+                              <span className="text-slate-400 font-bold">▼</span>
                             )}
-                            {item.fulfillmentStatus === 'DELIVERED' ? (t.deliveredStatus || 'Livré') : (t.markDelivered || 'Marquer Livré')}
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            onClick={() => handleMarkStatus(item.id, 'SHIPPED')}
-                            disabled={isLoading}
-                            className="h-8 text-xs font-bold rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 gap-1.5 shadow-sm"
-                          >
-                            {isLoading ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          </button>
+                        </td>
+                        <td className="py-3.5 px-3 font-bold text-slate-900 dark:text-slate-100">
+                          {item.order?.id ? (
+                            <Link
+                              href={`/vendor/orders/${item.order.id}`}
+                              className="hover:text-amber-500 transition-colors flex items-center gap-1"
+                            >
+                              {item.order?.orderNumber || 'N/A'}
+                            </Link>
+                          ) : (
+                            item.order?.orderNumber || 'N/A'
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="font-bold text-slate-900 dark:text-slate-100">{item.order?.user?.name || 'Client'}</div>
+                          <div className="text-[10px] text-slate-400">{item.order?.user?.email || 'N/A'}</div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="font-semibold text-slate-800 dark:text-slate-200">{item.product?.title || 'Produit'}</div>
+                          <div className="text-[10px] text-slate-400">{t.qty || 'Qté'}: {item.quantity} • {formatCurrency(item.unitPrice)}</div>
+                        </td>
+                        <td className="py-3.5 px-4 text-slate-500">{formatDate(item.createdAt)}</td>
+                        <td className="py-3.5 px-4">
+                          {getStatusBadge(item.fulfillmentStatus)}
+                        </td>
+                        <td className="py-3.5 px-4 font-extrabold text-slate-900 dark:text-slate-100">
+                          {formatCurrency(item.totalPrice)}
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {item.order?.id && (
+                              <Link href={`/vendor/orders/${item.order.id}`}>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 text-xs font-semibold rounded-xl border-slate-200 dark:border-slate-800 hover:border-amber-500/30 text-slate-700 dark:text-slate-300"
+                                >
+                                  Détails
+                                </Button>
+                              </Link>
+                            )}
+
+                            {isShipped ? (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleMarkStatus(item.id, 'DELIVERED')}
+                                disabled={isLoading || item.fulfillmentStatus === 'DELIVERED'}
+                                className="h-8 text-xs font-semibold rounded-xl text-purple-600 hover:bg-purple-500/10 gap-1.5"
+                              >
+                                {isLoading ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <PackageCheck className="w-3.5 h-3.5 text-purple-500" />
+                                )}
+                                {item.fulfillmentStatus === 'DELIVERED' ? (t.deliveredStatus || 'Livré') : (t.markDelivered || 'Marquer Livré')}
+                              </Button>
                             ) : (
-                              <Truck className="w-3.5 h-3.5" />
+                              <Button
+                                size="sm"
+                                onClick={() => handleMarkStatus(item.id, 'SHIPPED')}
+                                disabled={isLoading}
+                                className="h-8 text-xs font-bold rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 gap-1.5 shadow-sm"
+                              >
+                                {isLoading ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <Truck className="w-3.5 h-3.5" />
+                                )}
+                                {t.markShipped || 'Marquer Expédié'}
+                              </Button>
                             )}
-                            {t.markShipped || 'Marquer Expédié'}
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* Expandable Inline Dropdown Row for Minimal Order Information */}
+                      {isExpanded && (
+                        <tr className="bg-slate-50/80 dark:bg-slate-950/80">
+                          <td colSpan={8} className="p-4 border-b border-slate-200 dark:border-slate-800">
+                            <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                                <span className="font-bold text-xs text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                                  <Truck className="w-3.5 h-3.5 text-amber-500" />
+                                  Informations Minimales de la Commande #{item.order?.orderNumber}
+                                </span>
+                                {item.order?.id && (
+                                  <Link
+                                    href={`/vendor/orders/${item.order.id}`}
+                                    className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1"
+                                  >
+                                    Écran des détails de la commande →
+                                  </Link>
+                                )}
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                                <div>
+                                  <span className="font-bold text-[10px] uppercase text-slate-400 block mb-1">
+                                    Adresse de Livraison
+                                  </span>
+                                  {shippingAddress ? (
+                                    <div className="text-slate-700 dark:text-slate-300 space-y-0.5">
+                                      <p className="font-bold">{shippingAddress.fullName || item.order?.user?.name}</p>
+                                      <p>{shippingAddress.street} {shippingAddress.apartment ? `, Apt ${shippingAddress.apartment}` : ''}</p>
+                                      <p>{shippingAddress.city}, {shippingAddress.country}</p>
+                                      {shippingAddress.phoneNumber && (
+                                        <p className="text-slate-400 text-[11px] font-mono">Tél : {shippingAddress.phoneNumber}</p>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <p className="text-slate-400">Non renseignée</p>
+                                  )}
+                                </div>
+
+                                <div>
+                                  <span className="font-bold text-[10px] uppercase text-slate-400 block mb-1">
+                                    Transporteur & Suivi
+                                  </span>
+                                  <div className="text-slate-700 dark:text-slate-300 space-y-0.5">
+                                    <p className="font-bold">{shipment?.carrier || 'Standard Dashato'}</p>
+                                    <p className="font-mono text-slate-500 text-[11px]">
+                                      N° : {shipment?.trackingNumber || 'En préparation'}
+                                    </p>
+                                    <Badge variant="secondary" className="mt-1 text-[9px] font-bold">
+                                      {shipment?.status || 'EN ATTENTE'}
+                                    </Badge>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <span className="font-bold text-[10px] uppercase text-slate-400 block mb-1">
+                                    Règlement & Statut
+                                  </span>
+                                  <div className="text-slate-700 dark:text-slate-300 space-y-0.5">
+                                    <p className="font-bold">{payment?.paymentMethod || payment?.provider || 'Carte / Mobile Money'}</p>
+                                    <Badge variant="success" className="text-[9px] font-bold mt-1">
+                                      {payment?.status || 'CONFIRMÉ'}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   );
                 })
               )}

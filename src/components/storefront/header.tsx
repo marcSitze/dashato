@@ -16,6 +16,7 @@ import {
   LayoutDashboard,
   LogOut,
   Package,
+  Truck,
   Sparkles,
 } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
@@ -397,6 +398,9 @@ export function Header({ categories = [] }: { categories?: CategoryItem[] }) {
                       )}
                       <DropdownMenuItem onClick={() => router.push('/account')}>
                         <Package className="w-4 h-4 mr-2 text-muted-foreground" /> {t.myAccount}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => router.push('/account/orders')}>
+                        <Truck className="w-4 h-4 mr-2 text-amber-500" /> {t.myOrders || 'Mes Commandes'}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/login' })} className="text-rose-600 font-bold">

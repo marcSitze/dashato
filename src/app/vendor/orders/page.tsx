@@ -24,6 +24,9 @@ export default async function VendorOrdersPage() {
         order: {
           include: {
             user: { select: { id: true, name: true, email: true } },
+            shippingAddress: true,
+            shipments: true,
+            payments: true,
           },
         },
         product: true,

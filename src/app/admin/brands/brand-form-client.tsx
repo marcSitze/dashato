@@ -8,7 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 
-export function BrandFormClient({ initialData }: { initialData?: any }) {
+export function BrandFormClient({
+  initialData,
+  redirectPath = '/admin/products',
+}: {
+  initialData?: any;
+  redirectPath?: string;
+}) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -41,8 +47,9 @@ export function BrandFormClient({ initialData }: { initialData?: any }) {
         isFeatured,
       };
 
-      const url = initialData ? `/api/brands/${initialData.id}` : '/api/brands';
-      const method = initialData ? 'PUT' : 'POST';
+      const isEditing = Boolean(initialData?.id);
+      const url = isEditing ? `/api/brands/${initialData.id}` : '/api/brands';
+      const method = isEditing ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
         method,
@@ -53,8 +60,8 @@ export function BrandFormClient({ initialData }: { initialData?: any }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to save brand');
 
-      toast.success(initialData ? 'Brand updated!' : 'Brand created!');
-      router.push('/admin/products');
+      toast.success(isEditing ? 'Brand updated!' : 'Brand created!');
+      router.push(redirectPath);
       router.refresh();
     } catch (err: any) {
       toast.error(err.message || 'Brand save error');
@@ -138,7 +145,7 @@ export function BrandFormClient({ initialData }: { initialData?: any }) {
             disabled={isSubmitting}
             className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-base px-6 shadow-lg shadow-amber-500/20"
           >
-            <Save className="w-4 h-4 mr-2" /> {isSubmitting ? 'Saving...' : initialData ? 'Update Brand' : 'Create Brand'}
+            <Save className="w-4 h-4 mr-2" /> {isSubmitting ? 'Saving...' : initialData?.id ? 'Update Brand' : 'Create Brand'}
           </Button>
         </div>
       </form>

@@ -41,8 +41,9 @@ export function CategoryFormClient({ initialData, parentCategories }: { initialD
         isFeatured,
       };
 
-      const url = initialData ? `/api/categories/${initialData.id}` : '/api/categories';
-      const method = initialData ? 'PUT' : 'POST';
+      const isEditing = Boolean(initialData?.id);
+      const url = isEditing ? `/api/categories/${initialData.id}` : '/api/categories';
+      const method = isEditing ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
         method,
@@ -53,7 +54,7 @@ export function CategoryFormClient({ initialData, parentCategories }: { initialD
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to save category');
 
-      toast.success(initialData ? 'Category updated!' : 'Category created!');
+      toast.success(isEditing ? 'Category updated!' : 'Category created!');
       router.push('/admin/categories');
       router.refresh();
     } catch (err: any) {
@@ -141,7 +142,7 @@ export function CategoryFormClient({ initialData, parentCategories }: { initialD
             disabled={isSubmitting}
             className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-base px-6 shadow-lg shadow-amber-500/20"
           >
-            <Save className="w-4 h-4 mr-2" /> {isSubmitting ? 'Saving...' : initialData ? 'Update Category' : 'Create Category'}
+            <Save className="w-4 h-4 mr-2" /> {isSubmitting ? 'Saving...' : initialData?.id ? 'Update Category' : 'Create Category'}
           </Button>
         </div>
       </form>

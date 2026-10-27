@@ -2,9 +2,10 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Star, Heart, ShoppingBag, Scale } from 'lucide-react';
+import { Star, Heart, ShoppingBag, Scale, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { getDisplayThumbnail, isVideoUrl } from '@/lib/media-utils';
 import { useCartStore } from '@/store/cart-store';
 import { useWishlistStore } from '@/store/wishlist-store';
 import { useCompareStore } from '@/store/compare-store';
@@ -53,7 +54,11 @@ export function ProductCard({
   const isWishlisted = isInWishlist(id);
   const isCompared = isInCompare(id);
 
-  const mainImage = images[0]?.url || 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=600&q=80';
+  const isVideo = isVideoUrl(images[0]?.url);
+  const mainImage = getDisplayThumbnail(
+    images[0]?.url,
+    'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=600&q=80'
+  );
   const vendorName = vendor.store?.name || vendor.businessName || t.seller;
   const storeSlug = vendor.store?.slug || 'vendor';
   const stock = inventory?.quantity ?? 10;
@@ -141,6 +146,11 @@ export function ProductCard({
           {isNewArrival && (
             <Badge variant="secondary" className="bg-secondary text-secondary-foreground font-bold text-[10px]">
               {t.newArrivals}
+            </Badge>
+          )}
+          {isVideo && (
+            <Badge variant="outline" className="bg-slate-900/80 backdrop-blur-md text-white border-white/20 font-bold text-[10px] flex items-center gap-1 w-fit shadow-md">
+              <Play className="w-2.5 h-2.5 fill-red-500 text-red-500" /> Vidéo
             </Badge>
           )}
         </div>

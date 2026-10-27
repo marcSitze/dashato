@@ -23,11 +23,6 @@ export default async function VendorCreateProductPage() {
     db.vendor.findMany({ select: { id: true, businessName: true, store: { select: { name: true } } } }),
   ]);
 
-  // Pre-fill initialData for vendor if needed
-  const initialData = vendorRecord
-    ? { vendorId: vendorRecord.id }
-    : undefined;
-
   return (
     <div className="max-w-4xl mx-auto space-y-6 py-8 px-4">
       <div className="flex items-center justify-between">
@@ -46,7 +41,6 @@ export default async function VendorCreateProductPage() {
       </div>
 
       <ProductFormClient
-        initialData={initialData}
         categories={categories}
         brands={brands}
         vendors={vendors}

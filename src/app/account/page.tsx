@@ -15,6 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { SignOutButton } from '@/components/auth/sign-out-button';
+import { InlineOrderDropdown } from '@/components/orders/inline-order-dropdown';
 
 export default async function CustomerDashboardPage() {
   const user = await getCurrentUser();
@@ -35,12 +36,15 @@ export default async function CustomerDashboardPage() {
           take: 3,
           include: {
             items: { include: { product: true } },
+            shippingAddress: true,
+            shipments: true,
+            payments: true,
           },
         }),
       ]);
       ordersCount = oCount;
       wishlistCount = wCount;
-      recentOrders = rOrders;
+      recentOrders = JSON.parse(JSON.stringify(rOrders || []));
     } catch (err) {
       console.error('Customer dashboard db fetch error:', err);
     }
@@ -135,18 +139,31 @@ export default async function CustomerDashboardPage() {
               ) : (
                 <div className="space-y-3">
                   {recentOrders.map((ord: any) => (
-                    <div key={ord.id} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
+                    <div key={ord.id} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">{ord.orderNumber}</span>
+                          <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">#{ord.orderNumber}</span>
                           <Badge variant="success" className="text-[10px] uppercase font-bold">{ord.status}</Badge>
                         </div>
                         <p className="text-xs text-slate-500 mt-0.5">Commandé le {formatDate(ord.createdAt)} • {ord.items.length} article(s)</p>
                       </div>
-                      <div className="text-right">
-                        <div className="font-extrabold text-sm text-slate-900 dark:text-slate-100">{formatCurrency(ord.grandTotal)}</div>
-                        <Link href="/account/orders" className="text-xs font-semibold text-amber-600 hover:underline">
-                          Détails & Suivi
+                      <div className="flex items-center gap-3 self-end sm:self-center">
+                        <div className="text-right">
+                          <div className="font-extrabold text-sm text-slate-900 dark:text-slate-100">{formatCurrency(ord.grandTotal)}</div>
+                        </div>
+
+                        {/* Inline Minimal Dropdown Preview */}
+                        <InlineOrderDropdown
+                          order={ord}
+                          detailsHref={`/account/orders/${ord.id}`}
+                          variant="popover"
+                        />
+
+                        <Link
+                          href={`/account/orders/${ord.id}`}
+                          className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline"
+                        >
+                          Détails complets →
                         </Link>
                       </div>
                     </div>
