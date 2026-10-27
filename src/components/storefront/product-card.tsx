@@ -159,11 +159,10 @@ export function ProductCard({
         <div className="absolute top-3 right-3 flex flex-col gap-1.5 z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
           <button
             onClick={handleWishlistToggle}
-            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-colors ${
-              isWishlisted
+            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-colors ${isWishlisted
                 ? 'bg-rose-500 text-white'
                 : 'bg-card/90 text-card-foreground hover:bg-rose-500 hover:text-white'
-            }`}
+              }`}
             title={t.wishlist}
           >
             <Heart className="w-4 h-4 fill-current" />
@@ -171,11 +170,10 @@ export function ProductCard({
 
           <button
             onClick={handleCompareToggle}
-            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-colors ${
-              isCompared
+            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-colors ${isCompared
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-card/90 text-card-foreground hover:bg-primary hover:text-primary-foreground'
-            }`}
+              }`}
             title={t.addedToCompareToast}
           >
             <Scale className="w-4 h-4" />
@@ -209,9 +207,8 @@ export function ProductCard({
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-3.5 h-3.5 ${
-                    i < Math.floor(avgRating) ? 'fill-primary text-primary' : 'text-muted-foreground/30'
-                  }`}
+                  className={`w-3.5 h-3.5 ${i < Math.floor(avgRating) ? 'fill-primary text-primary' : 'text-muted-foreground/30'
+                    }`}
                 />
               ))}
             </div>
